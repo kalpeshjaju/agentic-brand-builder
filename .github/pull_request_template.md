@@ -1,95 +1,111 @@
-# Pull Request
+# Description
 
-## Description
-
-<!-- Provide a brief description of the changes in this PR -->
+<!-- Provide a brief description of what this PR does -->
 
 ## Type of Change
 
-<!-- Mark the relevant option with an 'x' -->
+<!-- Mark relevant option with 'x' -->
 
-- [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
-- [ ] ✨ New feature (non-breaking change which adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📝 Documentation update
-- [ ] ♻️ Refactoring (no functional changes)
+- [ ] 🐛 Bug fix (non-breaking change that fixes an issue)
+- [ ] ✨ New feature (non-breaking change that adds functionality)
+- [ ] 🤖 New agent implementation
+- [ ] 🧪 Test coverage improvement
+- [ ] 📚 Documentation update
+- [ ] 🔨 Refactoring (no functional changes)
 - [ ] ⚡ Performance improvement
-- [ ] ✅ Test updates
+- [ ] 🔧 Chore (build, dependencies, etc.)
 
-## Changes Made
+## What Changed
 
-<!-- List the key changes made in this PR -->
+<!-- Detailed description of changes -->
 
--
--
--
+### Before
+<!-- What was the behavior/state before? -->
 
-## Related Issues
+### After
+<!-- What is the behavior/state now? -->
 
-<!-- Link to any related issues (e.g., Fixes #123, Relates to #456) -->
+## Agent Implementation (if applicable)
 
-Fixes #
-Relates to #
+<!-- If implementing a new agent, fill this out -->
+
+**Agent Name**: [e.g., PDF Extraction Agent]
+**Stage**: [e.g., Stage 1]
+**Functionality**: [Brief description]
+
+**Agent Checklist**:
+- [ ] Extends BaseAgent
+- [ ] Implements run() method
+- [ ] System and user prompts defined
+- [ ] Response parsing implemented
+- [ ] Error handling added
+- [ ] Registered in AgentFactory
+- [ ] Added to StageOrchestrator
 
 ## Testing
 
-<!-- Describe the testing you've done -->
+<!-- How was this tested? -->
 
-- [ ] Type-check passes (`npm run type-check`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] Tests pass (`npm test`)
-- [ ] Build succeeds (`npm run build`)
+### Test Coverage
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
 - [ ] Manual testing completed
+- [ ] All tests passing locally
 
 ### How to Test
+1. Step 1
+2. Step 2
+3. Expected result
 
-<!-- Provide step-by-step instructions for testing this PR -->
+## Quality Checks
 
-1.
-2.
-3.
+<!-- All must pass before merge -->
+
+- [ ] ✅ Type-check passes (`npm run type-check`)
+- [ ] ✅ Lint passes (`npm run lint`)
+- [ ] ✅ Tests pass (`npm test`)
+- [ ] ✅ Build succeeds (`npm run build`)
+- [ ] ✅ Health check passes (`npm run health-check`)
+
+## Documentation
+
+- [ ] README.md updated (if applicable)
+- [ ] ROADMAP.md updated (if agent implemented)
+- [ ] Code comments added for complex logic
+- [ ] API documentation updated (if applicable)
+
+## Breaking Changes
+
+<!-- List any breaking changes, or state "None" -->
+
+- None
+
+## Related Issues
+
+<!-- Link related issues -->
+
+Closes #[issue number]
+Related to #[issue number]
 
 ## Checklist
 
-<!-- Ensure all items are checked before requesting review -->
+<!-- Final checklist before requesting review -->
 
-- [ ] Code follows project style guidelines
-- [ ] Files are <500 lines (split if larger)
-- [ ] Functions are <100 lines (refactor if larger)
-- [ ] Error messages have context and actionable guidance
-- [ ] No `console.log` statements or debug code
-- [ ] No commented-out code
-- [ ] No hardcoded secrets or API keys
-- [ ] TypeScript types are properly defined (no `any`)
-- [ ] Imports are specific (no wildcard imports)
-- [ ] Tests are included for new features
-- [ ] Documentation is updated (if needed)
-- [ ] Commit messages follow conventions
+- [ ] My code follows the project's code style
+- [ ] I have performed a self-review of my code
+- [ ] I have commented complex areas of my code
+- [ ] My changes generate no new warnings
+- [ ] I have added tests that prove my fix/feature works
+- [ ] New and existing tests pass locally
 
-## Screenshots (if applicable)
+## Additional Context
 
-<!-- Add screenshots or recordings to demonstrate changes -->
-
-## Code Review
-
-### 🤖 ChatGPT Codex Review
-
-<!-- To trigger automatic code review by Codex, comment: @codex review -->
-
-**To get AI-powered code review:**
-1. Comment `@codex review` on this PR
-2. Codex will analyze the changes and suggest improvements
-3. Codex will respond with specific feedback or 👍 if all looks good
-
-**You can also ask Codex specific questions:**
-- `@codex check for security issues`
-- `@codex review performance`
-- `@codex suggest improvements`
-- `@codex check accessibility`
+<!-- Any additional information that reviewers should know -->
 
 ---
 
-## Additional Notes
-
-<!-- Any additional context, concerns, or discussion points -->
-
+**For Reviewers**: Please check:
+- [ ] Code quality and style
+- [ ] Test coverage adequate
+- [ ] Documentation complete
+- [ ] No obvious bugs or issues
