@@ -3,30 +3,24 @@
  */
 
 export class TestFeature {
-  private unusedVariable = 'not used';
-
   constructor() {
-    console.log('TestFeature initialized');
-    // TODO: Remove this debug logging
+    // Initialization complete
   }
 
   async processData(input: string): Promise<string> {
-    console.log('Processing:', input);
-
     if (!input) {
-      console.log('Empty input received');
       return '';
     }
 
     const result = input.toUpperCase();
-    console.log('Result:', result);
-
     return result;
   }
 
-  // TODO: Implement error handling
-  validate(data: any): boolean {
-    console.log('Validating:', data);
+  validate(data: unknown): boolean {
+    // Basic validation - can be extended as needed
+    if (!data) {
+      return false;
+    }
     return true;
   }
 }
