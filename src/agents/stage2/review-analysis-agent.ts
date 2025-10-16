@@ -105,8 +105,26 @@ If review data is available in previous outputs, use it. Otherwise, provide guid
     });
 
     try {
-      const jsonMatch = response.content.match(/\{[\s\S]*\}/);
-      const data = jsonMatch ? JSON.parse(jsonMatch[0]) : { error: 'Could not parse response' };
+      // Extract JSON more carefully - find the first complete JSON object
+      const content = response.content.trim();
+      let jsonStr = '';
+
+      // Find first { and try to parse balanced JSON
+      const startIdx = content.indexOf('{');
+      if (startIdx === -1) {
+        throw new Error('No JSON object found in response');
+      }
+
+      let braceCount = 0;
+      for (let i = startIdx; i < content.length; i++) {
+        const char = content[i];
+        jsonStr += char;
+        if (char === '{') braceCount++;
+        if (char === '}') braceCount--;
+        if (braceCount === 0) break;
+      }
+
+      const data = JSON.parse(jsonStr);
 
       return {
         data,
