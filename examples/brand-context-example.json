@@ -1,0 +1,36 @@
+{
+  "brandName": "Flyberry Gourmet",
+  "category": "Gourmet Food & Snacks",
+  "currentRevenue": "₹35 Cr",
+  "targetRevenue": "₹100 Cr",
+  "website": "https://flyberry.in",
+  "competitors": [
+    "Happilo",
+    "Farmley",
+    "Nutraj",
+    "Yoga Bar"
+  ],
+  "dataSources": [
+    {
+      "type": "pdf",
+      "path": "./data/investor-report-q1-fy26.pdf",
+      "description": "Q1 FY26 Investor Report"
+    },
+    {
+      "type": "pdf",
+      "path": "./data/product-catalog.pdf",
+      "description": "Complete Product Catalog"
+    },
+    {
+      "type": "website",
+      "path": "https://flyberry.in",
+      "description": "Main Website"
+    },
+    {
+      "type": "reviews",
+      "path": "./data/customer-reviews.json",
+      "description": "Customer Reviews from Multiple Sources"
+    }
+  ],
+  "customInstructions": "Focus on repositioning from mid-premium 'healthy snacks' to ultra-luxury 'gourmet destination'. Leverage Fortune 500 client base as unfair advantage. Target 24-month transformation timeline."
+}
