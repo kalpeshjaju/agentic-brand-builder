@@ -40,251 +40,76 @@ Return structured, data-driven financial projections.`;
 ${previousOutputs}
 
 # Task
-Create comprehensive financial projections for this brand's growth strategy.
+Create 3-year financial projections for this brand.
 
-## Financial Projection Framework
+## Context
+- Current: ${input.context.currentRevenue || 'Startup'}
+- Target: ${input.context.targetRevenue || 'Growth stage'}
+- Category: ${input.context.category}
 
-### 1. Revenue Projections (3-5 Years)
+## Required Analysis
 
-**Base Assumptions**:
-- Current revenue: ${input.context.currentRevenue || 'To be determined'}
-- Target revenue: ${input.context.targetRevenue || 'To be determined'}
-- Market size and growth rate
-- Market share assumptions
-- Customer acquisition rate
+### 1. Revenue Model (3 years)
+Project annual revenue, customers, AOV, and growth assumptions.
 
-**Revenue Drivers**:
-- Number of customers
-- Average order value (AOV)
-- Purchase frequency
-- Customer lifetime value (CLTV)
-- Churn rate
+### 2. Cost Structure
+- Fixed costs (team, infrastructure)
+- Variable costs (COGS%, marketing%, logistics%)
 
-**Projection Model**:
-Year 1, 2, 3, 4, 5 with:
-- Revenue
-- Customer count
-- AOV
-- Transaction volume
+### 3. Profitability
+Calculate gross margin, operating margin, break-even timeline.
 
-### 2. Cost Structure Analysis
+### 4. Unit Economics
+- CAC (customer acquisition cost)
+- LTV (lifetime value)
+- LTV:CAC ratio (target >3)
+- Payback period (target <12mo)
 
-**Fixed Costs**:
-- Salaries and benefits
-- Rent and utilities
-- Technology infrastructure
-- Insurance and legal
+### 5. Scenarios
+Best case (30%), base case (50%), worst case (20%) with Year 3 revenue projections.
 
-**Variable Costs**:
-- Cost of goods sold (COGS)
-- Marketing and advertising
-- Shipping and logistics
-- Payment processing
-- Customer support
-
-**Cost Assumptions**:
-- COGS as % of revenue
-- Marketing as % of revenue
-- Operating expenses
-
-### 3. Profitability Analysis
-
-**Key Metrics**:
-- Gross margin
-- Operating margin
-- Net margin
-- EBITDA
-
-**Profitability Timeline**:
-- When do we break even?
-- When do we become profitable?
-- Path to profitability
-
-### 4. Break-Even Analysis
-
-**Break-Even Calculation**:
-- Fixed costs / (Price - Variable cost per unit)
-- Monthly revenue needed
-- Number of customers needed
-- Timeline to break-even
-
-### 5. Unit Economics
-
-**Customer Acquisition**:
-- Customer acquisition cost (CAC)
-- Lifetime value (LTV)
-- LTV:CAC ratio (target: >3)
-- Payback period (target: <12 months)
-
-**Per-Transaction Economics**:
-- Average order value
-- Gross profit per order
-- Contribution margin
-
-### 6. Scenario Modeling
-
-**Best Case** (30% probability):
-- Higher than expected growth
-- Lower costs
-- Assumptions
-
-**Base Case** (50% probability):
-- Realistic expectations
-- Moderate growth
-- Assumptions
-
-**Worst Case** (20% probability):
-- Slower growth
-- Higher costs
-- Assumptions
-
-### 7. Cash Flow Projections
-
-**Operating Cash Flow**:
-- Cash from operations
-- Working capital needs
-- Seasonality factors
-
-**Investment Cash Flow**:
-- Capital expenditures
-- Asset purchases
-
-**Financing Cash Flow**:
-- Funding rounds
-- Debt servicing
-- Equity dilution
-
-### 8. Investment Requirements
-
-**Funding Needed**:
-- Initial investment
-- Follow-on rounds
-- Use of funds breakdown
-
-**Sources of Capital**:
-- Bootstrapping
-- Angel/VC funding
-- Debt financing
-- Revenue financing
+### 6. Investment Needs
+Total funding required and use of funds breakdown.
 
 # Output Format
-Provide structured JSON:
+Return JSON with this structure:
 {
   "revenueProjections": {
-    "assumptions": {
-      "marketSize": "₹5000 Cr",
-      "marketGrowth": "15% CAGR",
-      "targetMarketShare": "2% by Year 5",
-      "customerAcquisition": "10K customers Year 1, 50% growth"
-    },
     "projections": [
-      {
-        "year": 1,
-        "revenue": 10000000,
-        "customers": 10000,
-        "aov": 1000,
-        "purchaseFrequency": 1.0,
-        "growth": "baseline"
-      },
-      {
-        "year": 2,
-        "revenue": 18000000,
-        "customers": 15000,
-        "aov": 1200,
-        "purchaseFrequency": 1.0,
-        "growth": "80%"
-      }
+      { "year": 1, "revenue": 10000000, "customers": 10000, "aov": 1000 },
+      { "year": 2, "revenue": 18000000, "customers": 15000, "aov": 1200 },
+      { "year": 3, "revenue": 30000000, "customers": 22000, "aov": 1364 }
     ]
   },
   "costStructure": {
-    "fixedCosts": {
-      "salaries": 3000000,
-      "rent": 500000,
-      "technology": 1000000,
-      "total": 4500000
-    },
-    "variableCosts": {
-      "cogs": { "percentage": 40, "amount": 4000000 },
-      "marketing": { "percentage": 20, "amount": 2000000 },
-      "logistics": { "percentage": 10, "amount": 1000000 }
-    }
+    "fixedCosts": { "total": 4500000 },
+    "variableCosts": { "cogsPercent": 40, "marketingPercent": 20 }
   },
   "profitability": {
-    "byYear": [
-      {
-        "year": 1,
-        "revenue": 10000000,
-        "grossProfit": 6000000,
-        "grossMargin": "60%",
-        "operatingProfit": -500000,
-        "operatingMargin": "-5%",
-        "netProfit": -500000,
-        "netMargin": "-5%"
-      }
-    ],
     "breakEvenMonth": 18,
-    "profitableYear": 2
-  },
-  "breakEvenAnalysis": {
-    "fixedCosts": 4500000,
-    "contributionMargin": 600,
-    "breakEvenUnits": 7500,
-    "breakEvenRevenue": 7500000,
-    "currentRunRate": 10000000,
-    "monthsToBreakEven": 18
+    "grossMargin": "60%"
   },
   "unitEconomics": {
     "cac": 200,
     "ltv": 800,
-    "ltvCacRatio": 4.0,
-    "paybackMonths": 6,
-    "aov": 1000,
-    "grossProfitPerOrder": 600,
-    "contributionMargin": "60%"
+    "ltvCacRatio": 4.0
   },
   "scenarios": {
-    "best": {
-      "probability": 0.30,
-      "year3Revenue": 50000000,
-      "assumptions": ["30% higher growth", "15% lower CAC"],
-      "triggers": ["Viral growth", "Strategic partnerships"]
-    },
-    "base": {
-      "probability": 0.50,
-      "year3Revenue": 35000000,
-      "assumptions": ["Plan growth rates", "Expected costs"]
-    },
-    "worst": {
-      "probability": 0.20,
-      "year3Revenue": 20000000,
-      "assumptions": ["50% of planned growth", "20% higher costs"],
-      "risks": ["Market slowdown", "Increased competition"]
-    }
-  },
-  "cashFlow": {
-    "year1": {
-      "operatingCashFlow": -500000,
-      "investmentCashFlow": -2000000,
-      "financingCashFlow": 5000000,
-      "netCashFlow": 2500000
-    }
+    "best": { "year3Revenue": 50000000 },
+    "base": { "year3Revenue": 35000000 },
+    "worst": { "year3Revenue": 20000000 }
   },
   "investmentRequirements": {
     "totalNeeded": 5000000,
-    "useOfFunds": {
-      "productDevelopment": 1500000,
-      "marketing": 2000000,
-      "operations": 1000000,
-      "workingCapital": 500000
-    },
-    "fundingSources": ["Seed round", "Angel investors"],
-    "runway": "18 months"
+    "useOfFunds": { "marketing": 2000000, "operations": 1500000, "product": 1500000 }
   },
   "confidence": 0.75
-}`;
+}
+
+Keep response concise. Focus on key numbers and realistic assumptions.`;
 
     const response = await this.callClaude(systemPrompt, userPrompt, {
-      maxTokens: 10000
+      maxTokens: 4000
     });
 
     try {
