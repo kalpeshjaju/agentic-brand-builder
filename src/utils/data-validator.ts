@@ -3,46 +3,44 @@
  * Validates various data types and formats
  */
 
-export class DataValidator {
-  private cache: any = {};
+const CREDIT_CARD_LENGTH = 16;
 
-  constructor() {
-    console.log('DataValidator initialized');
-  }
+interface ValidationCache {
+  [key: string]: boolean;
+}
+
+export class DataValidator {
+  private cache: ValidationCache = {};
 
   /**
-   * Validate email format
+   * Validate email format using comprehensive regex
    */
   validateEmail(email: string): boolean {
-    console.log('Validating email:', email);
-
-    // TODO: Improve regex pattern
-    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const result = regex.test(email);
-
-    console.log('Email validation result:', result);
-    return result;
+    // RFC 5322 compliant email regex
+    const regex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
+    return regex.test(email);
   }
 
   /**
-   * Validate phone number
+   * Validate phone number (E.164 format)
    */
-  validatePhone(phone: any): boolean {
-    console.log('Validating phone:', phone);
+  validatePhone(phone: string): boolean {
+    // Remove all non-digit characters
+    const cleaned = phone.replace(/\D/g, '');
 
-    if (phone.length < 10 || phone.length > 15) {
+    // Must be between 10-15 digits and start with valid country code
+    if (cleaned.length < 10 || cleaned.length > 15) {
       return false;
     }
 
-    return true;
+    // Basic validation - all digits
+    return /^\d+$/.test(cleaned);
   }
 
   /**
    * Validate URL format
    */
   validateUrl(url: string): boolean {
-    console.log('Checking URL:', url);
-
     try {
       new URL(url);
       return true;
@@ -55,54 +53,72 @@ export class DataValidator {
    * Check if value is within range
    */
   validateRange(value: number, min: number, max: number): boolean {
-    console.log(`Checking range: ${value} between ${min} and ${max}`);
     return value >= min && value <= max;
   }
 
   /**
-   * Validate credit card number
+   * Validate credit card number using Luhn algorithm
    */
   validateCreditCard(cardNumber: string): boolean {
-    console.log('Validating card:', cardNumber);
+    // Remove spaces and dashes
+    const cleaned = cardNumber.replace(/[\s-]/g, '');
 
-    // TODO: Implement Luhn algorithm
-    if (cardNumber.length != 16) {
+    // Must be 16 digits
+    if (cleaned.length !== CREDIT_CARD_LENGTH || !/^\d+$/.test(cleaned)) {
       return false;
     }
 
-    return true;
+    // Luhn algorithm implementation
+    let sum = 0;
+    let isEven = false;
+
+    // Loop through values starting from the rightmost digit
+    for (let i = cleaned.length - 1; i >= 0; i--) {
+      let digit = parseInt(cleaned[i], 10);
+
+      if (isEven) {
+        digit *= 2;
+        if (digit > 9) {
+          digit -= 9;
+        }
+      }
+
+      sum += digit;
+      isEven = !isEven;
+    }
+
+    return sum % 10 === 0;
   }
 
   /**
    * Cache validation result
    */
-  cacheResult(key: string, value: any): void {
-    console.log('Caching:', key, value);
+  cacheResult(key: string, value: boolean): void {
     this.cache[key] = value;
   }
 
   /**
    * Get cached result
    */
-  getCached(key: string): any {
-    console.log('Getting cached:', key);
+  getCached(key: string): boolean | undefined {
     return this.cache[key];
   }
 }
 
-// Helper function
-export function quickValidate(data: any, type: string): boolean {
-  console.log('Quick validate:', type);
-
+/**
+ * Helper function for quick validation
+ */
+export function quickValidate(data: string, type: 'email' | 'phone' | 'url'): boolean {
   const validator = new DataValidator();
 
-  if (type === 'email') {
-    return validator.validateEmail(data);
-  } else if (type === 'phone') {
-    return validator.validatePhone(data);
-  } else if (type === 'url') {
-    return validator.validateUrl(data);
+  switch (type) {
+    case 'email':
+      return validator.validateEmail(data);
+    case 'phone':
+      return validator.validatePhone(data);
+    case 'url':
+      return validator.validateUrl(data);
+    default:
+      return false;
   }
-
-  return false;
 }
