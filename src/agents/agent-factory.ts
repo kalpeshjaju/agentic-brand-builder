@@ -6,11 +6,16 @@ import { BaseAgent } from './base-agent.js';
 import { CompetitorResearchAgent } from './stage1/competitor-research-agent.js';
 import { PdfExtractionAgent } from './stage1/pdf-extraction-agent.js';
 import { DataNormalizationAgent } from './stage1/data-normalization-agent.js';
+import { EntityRecognitionAgent } from './stage1/entity-recognition-agent.js';
+import { MarketIntelligenceAgent } from './stage1/market-intelligence-agent.js';
 import { ReviewAnalysisAgent } from './stage2/review-analysis-agent.js';
 import { SegmentationAgent } from './stage2/segmentation-agent.js';
 import { JtbdAgent } from './stage2/jtbd-agent.js';
+import { PositioningMapperAgent } from './stage2/positioning-mapper-agent.js';
+import { DifferentiationAnalyzerAgent } from './stage2/differentiation-analyzer-agent.js';
 import { PositioningStrategyAgent } from './stage3/positioning-strategy-agent.js';
 import { MessagingArchitectureAgent } from './stage3/messaging-architecture-agent.js';
+import { BrandNarrativeAgent } from './stage3/brand-narrative-agent.js';
 import { StrategicDocumentWriterAgent } from './stage4/strategic-document-writer-agent.js';
 import { HtmlGeneratorAgent } from './stage6/html-generator-agent.js';
 
@@ -44,6 +49,12 @@ export class AgentFactory {
       case AgentType.DATA_NORMALIZATION:
         return new DataNormalizationAgent(config, this.apiKey);
 
+      case AgentType.ENTITY_RECOGNITION:
+        return new EntityRecognitionAgent(config, this.apiKey);
+
+      case AgentType.MARKET_INTELLIGENCE:
+        return new MarketIntelligenceAgent(config, this.apiKey);
+
       // Stage 2: Analysis
       case AgentType.REVIEW_ANALYSIS:
         return new ReviewAnalysisAgent(config, this.apiKey);
@@ -54,12 +65,21 @@ export class AgentFactory {
       case AgentType.JOBS_TO_BE_DONE:
         return new JtbdAgent(config, this.apiKey);
 
+      case AgentType.POSITIONING_MAPPER:
+        return new PositioningMapperAgent(config, this.apiKey);
+
+      case AgentType.DIFFERENTIATION_ANALYZER:
+        return new DifferentiationAnalyzerAgent(config, this.apiKey);
+
       // Stage 3: Strategic Intelligence
       case AgentType.POSITIONING_STRATEGY:
         return new PositioningStrategyAgent(config, this.apiKey);
 
       case AgentType.MESSAGING_ARCHITECTURE:
         return new MessagingArchitectureAgent(config, this.apiKey);
+
+      case AgentType.BRAND_NARRATIVE:
+        return new BrandNarrativeAgent(config, this.apiKey);
 
       // Stage 4: Content Generation
       case AgentType.STRATEGIC_DOCUMENT_WRITER:

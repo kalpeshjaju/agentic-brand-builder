@@ -1,10 +1,10 @@
 # Agentic Brand Builder
 
-> **🚧 BETA** - Engineering foundation complete, **25% of agents implemented** (10 of 40)
+> **🚧 BETA** - Engineering foundation complete, **37.5% of agents implemented** (15 of 40)
 
 [![Status](https://img.shields.io/badge/status-early%20beta-yellow)](https://github.com/yourusername/agentic-brand-builder)
-[![Implementation](https://img.shields.io/badge/implementation-25%25-orange)](./AUDIT_REPORT.md)
-[![Tests](https://img.shields.io/badge/tests-73%20passing-green)](./tests)
+[![Implementation](https://img.shields.io/badge/implementation-37.5%25-orange)](./AUDIT_REPORT.md)
+[![Tests](https://img.shields.io/badge/tests-115%20passing-green)](./tests)
 [![TypeScript](https://img.shields.io/badge/typescript-strict-blue)](./tsconfig.json)
 
 AI-powered brand intelligence system with 6-stage multi-agent orchestration for comprehensive brand strategy documents **(In Development)**
@@ -20,7 +20,7 @@ AI-powered brand intelligence system with 6-stage multi-agent orchestration for 
 | **Type System** | ✅ Complete | 100% |
 | **Quality Gates** | ✅ Complete | 100% |
 | **Agent Framework** | ✅ Complete | 100% |
-| **Agent Implementations** | 🟡 In Progress | **25%** (10/40) |
+| **Agent Implementations** | 🟡 In Progress | **37.5%** (15/40) |
 | **Document Generation** | ❌ Not Started | 0% |
 | **Output Formatting** | ❌ Not Started | 0% |
 | **Testing** | 🟡 Basic Coverage | 40% |
@@ -43,14 +43,14 @@ The Agentic Brand Builder is designed to become a production-grade system that g
 - ✅ CLI interface (validate, orchestrate)
 - ✅ Error handling with retry logic
 - ✅ TypeScript strict mode
-- ✅ 73 passing unit tests
+- ✅ 115 passing unit tests
 
 ### What's In Progress 🟡
 
-- 🟡 **10 of 40 agents implemented** (25%):
-  - CompetitorResearchAgent, PdfExtractionAgent, DataNormalizationAgent (Stage 1)
-  - ReviewAnalysisAgent, SegmentationAgent, JtbdAgent (Stage 2)
-  - PositioningStrategyAgent, MessagingArchitectureAgent (Stage 3)
+- 🟡 **15 of 40 agents implemented** (37.5%):
+  - CompetitorResearchAgent, PdfExtractionAgent, DataNormalizationAgent, EntityRecognitionAgent, MarketIntelligenceAgent (Stage 1)
+  - ReviewAnalysisAgent, SegmentationAgent, JtbdAgent, PositioningMapperAgent, DifferentiationAnalyzerAgent (Stage 2)
+  - PositioningStrategyAgent, MessagingArchitectureAgent, BrandNarrativeAgent (Stage 3)
   - StrategicDocumentWriterAgent (Stage 4)
   - HtmlGeneratorAgent (Stage 6)
 - 🟡 Basic test coverage (~40%)
