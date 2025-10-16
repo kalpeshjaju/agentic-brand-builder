@@ -24,7 +24,7 @@ export class EntityRecognitionAgent extends BaseAgent {
     const brandContext = this.formatBrandContext(input);
     const previousOutputs = this.formatPreviousOutputs(input);
 
-    const systemPrompt = `You are an expert at Named Entity Recognition (NER) and` +
+    const systemPrompt = 'You are an expert at Named Entity Recognition (NER) and' +
       ` information extraction. Your role is to:
 1. Identify and extract key entities from text and data
 2. Classify entities into appropriate categories

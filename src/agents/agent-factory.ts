@@ -8,6 +8,7 @@ import { PdfExtractionAgent } from './stage1/pdf-extraction-agent.js';
 import { DataNormalizationAgent } from './stage1/data-normalization-agent.js';
 import { EntityRecognitionAgent } from './stage1/entity-recognition-agent.js';
 import { MarketIntelligenceAgent } from './stage1/market-intelligence-agent.js';
+import { PricingIntelligenceAgent } from './stage1/pricing-intelligence-agent.js';
 import { ReviewAnalysisAgent } from './stage2/review-analysis-agent.js';
 import { SegmentationAgent } from './stage2/segmentation-agent.js';
 import { JtbdAgent } from './stage2/jtbd-agent.js';
@@ -54,6 +55,9 @@ export class AgentFactory {
 
       case AgentType.MARKET_INTELLIGENCE:
         return new MarketIntelligenceAgent(config, this.apiKey);
+
+      case AgentType.PRICING_INTELLIGENCE:
+        return new PricingIntelligenceAgent(config, this.apiKey);
 
       // Stage 2: Analysis
       case AgentType.REVIEW_ANALYSIS:
