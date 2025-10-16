@@ -168,8 +168,8 @@ ${context.customInstructions ? `\n**Custom Instructions**:\n${context.customInst
 # Previous Stage Outputs
 
 ${Object.entries(input.previousStageOutputs)
-  .map(([key, value]) => `## ${key}\n\n${JSON.stringify(value, null, 2)}`)
-  .join('\n\n')}
+    .map(([key, value]) => `## ${key}\n\n${JSON.stringify(value, null, 2)}`)
+    .join('\n\n')}
     `.trim();
   }
 }

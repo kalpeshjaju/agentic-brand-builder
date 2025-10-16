@@ -223,8 +223,12 @@ export class MasterOrchestrator {
   private determineOverallStatus(results: StageResult[]): 'success' | 'partial' | 'failed' {
     const failed = results.filter(r => r.status === 'failed');
 
-    if (failed.length === 0) return 'success';
-    if (failed.some(r => this.isCriticalStage(r.stage))) return 'failed';
+    if (failed.length === 0) {
+      return 'success';
+    }
+    if (failed.some(r => this.isCriticalStage(r.stage))) {
+      return 'failed';
+    }
     return 'partial';
   }
 

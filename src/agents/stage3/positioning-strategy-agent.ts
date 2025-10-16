@@ -37,12 +37,14 @@ Provide actionable, evidence-based positioning strategy.`;
 ${previousOutputs}
 
 # Task
-Based on ALL previous research and analysis, create a comprehensive brand positioning strategy for ${input.context.brandName}.
+Based on ALL previous research and analysis, create a comprehensive brand positioning ` +
+      `strategy for ${input.context.brandName}.
 
 # Framework: Josh Lowman Brand Positioning
 
 1. **Positioning Statement**
-   Format: "For [target customer] who [need/opportunity], [brand] is the [category] that [key benefit] because [reason to believe]."
+   Format: "For [target customer] who [need/opportunity], [brand] is the [category] ` +
+      `that [key benefit] because [reason to believe]."
 
 2. **Positioning Pillars** (3-5 pillars)
    Each pillar should have:
@@ -118,9 +120,15 @@ Based on ALL previous research and analysis, create a comprehensive brand positi
       for (let i = startIdx; i < content.length; i++) {
         const char = content[i];
         jsonStr += char;
-        if (char === '{') braceCount++;
-        if (char === '}') braceCount--;
-        if (braceCount === 0) break;
+        if (char === '{') {
+          braceCount++;
+        }
+        if (char === '}') {
+          braceCount--;
+        }
+        if (braceCount === 0) {
+          break;
+        }
       }
 
       const data = JSON.parse(jsonStr);

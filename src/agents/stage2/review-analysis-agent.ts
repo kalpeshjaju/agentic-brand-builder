@@ -119,9 +119,15 @@ If review data is available in previous outputs, use it. Otherwise, provide guid
       for (let i = startIdx; i < content.length; i++) {
         const char = content[i];
         jsonStr += char;
-        if (char === '{') braceCount++;
-        if (char === '}') braceCount--;
-        if (braceCount === 0) break;
+        if (char === '{') {
+          braceCount++;
+        }
+        if (char === '}') {
+          braceCount--;
+        }
+        if (braceCount === 0) {
+          break;
+        }
       }
 
       const data = JSON.parse(jsonStr);

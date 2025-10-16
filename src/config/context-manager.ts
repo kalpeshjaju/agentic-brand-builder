@@ -99,7 +99,7 @@ export class ContextManager {
     totalStages: number;
     brandName: string;
     category: string;
-  } {
+    } {
     return {
       completedStages: this.stageOutputs.size,
       totalStages: 6,
@@ -115,7 +115,7 @@ export class ContextManager {
     brandContext: BrandContext;
     stageResults: Record<string, StageResult>;
     sharedData: Record<string, unknown>;
-  } {
+    } {
     return {
       brandContext: this.brandContext,
       stageResults: Object.fromEntries(this.stageOutputs),

@@ -9,10 +9,12 @@
     "build": "tsc",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
     "test": "vitest",
     "test:watch": "vitest --watch",
     "orchestrate": "tsx src/cli.ts orchestrate",
     "analyze": "tsx src/cli.ts analyze",
+    "health-check": "tsx scripts/health-check.ts",
     "detect-deep-review": "tsx scripts/orchestrator/deep-review-detector.ts",
     "review:deep": "tsx scripts/local/deep-review.ts",
     "review:deep:help": "tsx scripts/local/deep-review.ts --help"

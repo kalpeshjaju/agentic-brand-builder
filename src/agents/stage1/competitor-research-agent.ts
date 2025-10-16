@@ -14,7 +14,8 @@ export class CompetitorResearchAgent extends BaseAgent {
   }> {
     const brandContext = this.formatBrandContext(input);
 
-    const systemPrompt = `You are a competitive intelligence analyst specializing in brand positioning and market analysis.
+    const systemPrompt = 'You are a competitive intelligence analyst specializing in brand positioning ' +
+      'and market analysis.' + `
 
 Your role is to research competitors and provide comprehensive competitive intelligence including:
 - Competitive positioning analysis
@@ -79,7 +80,7 @@ Provide a COMPACT, VALID JSON response with:
     try {
       // Try multiple parsing strategies
       const content = response.content.trim();
-      let data: any;
+      let data: unknown;
 
       // Strategy 1: Try balanced brace counting
       try {
@@ -90,7 +91,9 @@ Provide a COMPACT, VALID JSON response with:
           for (let i = startIdx; i < content.length; i++) {
             const char = content[i];
             jsonStr += char;
-            if (char === '{') braceCount++;
+            if (char === '{') {
+              braceCount++;
+            }
             if (char === '}') {
               braceCount--;
               if (braceCount === 0) {
@@ -100,7 +103,7 @@ Provide a COMPACT, VALID JSON response with:
             }
           }
         }
-      } catch (e) {
+      } catch {
         // Strategy 1 failed, try strategy 2
       }
 
@@ -109,27 +112,30 @@ Provide a COMPACT, VALID JSON response with:
         data = {
           competitors: input.context.competitors.map((comp: string) => ({
             name: comp,
-            positioning: "Placeholder - competitor analysis data",
-            targetAudience: "Analysis not available",
-            pricingStrategy: "unknown",
-            keyDifferentiators: ["Placeholder data"],
-            brandMessaging: { tone: "Unknown", keyMessages: [], valuePropositions: [] },
-            strengths: ["Data not available"],
-            weaknesses: ["Data not available"]
+            positioning: 'Placeholder - competitor analysis data',
+            targetAudience: 'Analysis not available',
+            pricingStrategy: 'unknown',
+            keyDifferentiators: ['Placeholder data'],
+            brandMessaging: { tone: 'Unknown', keyMessages: [], valuePropositions: [] },
+            strengths: ['Data not available'],
+            weaknesses: ['Data not available']
           })),
-          marketGaps: ["Full analysis encountered parsing issues - use placeholder data"],
-          opportunities: ["Recommend manual competitive research"],
+          marketGaps: ['Full analysis encountered parsing issues - use placeholder data'],
+          opportunities: ['Recommend manual competitive research'],
           confidence: 0.3,
           sources: ['partial_analysis'],
           note: 'JSON parsing failed - placeholder data returned'
         };
       }
 
+      // Type assertion - we know data structure from either Claude or placeholder
+      const typedData = data as { confidence?: number; sources?: string[] };
+
       return {
         data,
         tokensUsed: response.tokensUsed,
-        confidence: data.confidence || 0.7,
-        sources: data.sources || []
+        confidence: typedData.confidence || 0.7,
+        sources: typedData.sources || []
       };
     } catch (error) {
       throw new Error(`Failed to parse competitor research response: ${(error as Error).message}`);
