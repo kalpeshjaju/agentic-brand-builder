@@ -80,7 +80,7 @@ export class AgentCache {
     const entry: CacheEntry<T> = {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.defaultTTL,
+      ttl: ttl || this.defaultTTL
     };
 
     this.cache.set(key, entry as CacheEntry<unknown>);
@@ -148,13 +148,13 @@ export class AgentCache {
     hits: number;
     misses: number;
     hitRate: number;
-  } {
+    } {
     const total = this.hits + this.misses;
     return {
       size: this.cache.size,
       hits: this.hits,
       misses: this.misses,
-      hitRate: total > 0 ? this.hits / total : 0,
+      hitRate: total > 0 ? this.hits / total : 0
     };
   }
 

@@ -15,14 +15,14 @@ export const AgentInputSchema = z.object({
     name: z.string().min(1, 'Brand name is required'),
     url: z.string().url('Invalid brand URL').optional(),
     industry: z.string().optional(),
-    description: z.string().optional(),
+    description: z.string().optional()
   }),
   context: z.record(z.unknown()).optional(),
   previousOutputs: z.record(z.unknown()).optional(),
   config: z.object({
     temperature: z.number().min(0).max(2).optional(),
-    maxTokens: z.number().positive().optional(),
-  }).optional(),
+    maxTokens: z.number().positive().optional()
+  }).optional()
 });
 
 export type ValidatedAgentInput = z.infer<typeof AgentInputSchema>;

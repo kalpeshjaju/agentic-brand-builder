@@ -57,7 +57,7 @@ export class PerformanceMonitor {
       startTime,
       endTime,
       duration: endTime - startTime,
-      ...options,
+      ...options
     };
 
     this.metrics.push(metric);
@@ -96,7 +96,7 @@ export class PerformanceMonitor {
       const metric = this.stopTimer(timerId, {
         success,
         tokensUsed,
-        errorType,
+        errorType
       });
     }
 
@@ -157,7 +157,7 @@ export class PerformanceMonitor {
       totalTokens,
       cacheHitRate:
         cacheableMetrics.length > 0 ? cacheHits / cacheableMetrics.length : 0,
-      errorsByType,
+      errorsByType
     };
   }
 
@@ -184,11 +184,11 @@ export class PerformanceMonitor {
     timestamp: number;
     metrics: PerformanceMetric[];
     summary: ReturnType<typeof this.getStats>;
-  } {
+    } {
     return {
       timestamp: Date.now(),
       metrics: this.getMetrics(),
-      summary: this.getStats(),
+      summary: this.getStats()
     };
   }
 
