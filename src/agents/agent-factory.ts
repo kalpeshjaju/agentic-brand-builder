@@ -17,8 +17,12 @@ import { DifferentiationAnalyzerAgent } from './stage2/differentiation-analyzer-
 import { PositioningStrategyAgent } from './stage3/positioning-strategy-agent.js';
 import { MessagingArchitectureAgent } from './stage3/messaging-architecture-agent.js';
 import { BrandNarrativeAgent } from './stage3/brand-narrative-agent.js';
+import { RoadmapPlanningAgent } from './stage3/roadmap-planning-agent.js';
 import { StrategicDocumentWriterAgent } from './stage4/strategic-document-writer-agent.js';
+import { ExecutiveSummaryWriterAgent } from './stage4/executive-summary-writer-agent.js';
+import { ConsistencyCheckerAgent } from './stage5/consistency-checker-agent.js';
 import { HtmlGeneratorAgent } from './stage6/html-generator-agent.js';
+import { FinancialProjectionAgent } from './stage2/financial-projection-agent.js';
 
 /**
  * Agent Factory - Creates agents based on type
@@ -75,6 +79,9 @@ export class AgentFactory {
       case AgentType.DIFFERENTIATION_ANALYZER:
         return new DifferentiationAnalyzerAgent(config, this.apiKey);
 
+      case AgentType.FINANCIAL_PROJECTION:
+        return new FinancialProjectionAgent(config, this.apiKey);
+
       // Stage 3: Strategic Intelligence
       case AgentType.POSITIONING_STRATEGY:
         return new PositioningStrategyAgent(config, this.apiKey);
@@ -85,9 +92,19 @@ export class AgentFactory {
       case AgentType.BRAND_NARRATIVE:
         return new BrandNarrativeAgent(config, this.apiKey);
 
+      case AgentType.ROADMAP_PLANNING:
+        return new RoadmapPlanningAgent(config, this.apiKey);
+
       // Stage 4: Content Generation
       case AgentType.STRATEGIC_DOCUMENT_WRITER:
         return new StrategicDocumentWriterAgent(config, this.apiKey);
+
+      case AgentType.EXECUTIVE_SUMMARY_WRITER:
+        return new ExecutiveSummaryWriterAgent(config, this.apiKey);
+
+      // Stage 5: Quality Assurance
+      case AgentType.CONSISTENCY_CHECKER:
+        return new ConsistencyCheckerAgent(config, this.apiKey);
 
       // Stage 6: Production
       case AgentType.HTML_GENERATOR:
