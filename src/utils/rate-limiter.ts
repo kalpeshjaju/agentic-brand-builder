@@ -5,15 +5,21 @@
  */
 
 export interface RateLimitConfig {
-  maxRequests: number;
-  windowMs: number;
+  readonly maxRequests: number;
+  readonly windowMs: number;
 }
 
 export class RateLimiter {
   private requests: number[] = [];
 
-  constructor(private config: RateLimitConfig) {
-    console.log('RateLimiter initialized with config:', config);
+  constructor(private readonly config: RateLimitConfig) {
+    // Validate configuration
+    if (config.maxRequests <= 0) {
+      throw new Error('maxRequests must be positive');
+    }
+    if (config.windowMs <= 0) {
+      throw new Error('windowMs must be positive');
+    }
   }
 
   /**
@@ -25,8 +31,6 @@ export class RateLimiter {
 
     // Remove old requests outside the window
     this.requests = this.requests.filter(time => time > windowStart);
-
-    console.log('Current request count:', this.requests.length);
 
     return this.requests.length < this.config.maxRequests;
   }
@@ -44,7 +48,6 @@ export class RateLimiter {
   async waitForSlot(): Promise<void> {
     while (!(await this.canMakeRequest())) {
       const waitTime = this.getWaitTime();
-      console.log(`Rate limit reached, waiting ${waitTime}ms`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
