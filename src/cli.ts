@@ -32,9 +32,9 @@ program
     try {
       console.log(chalk.bold.blue('\n🚀 Agentic Brand Builder\n'));
 
-      // Early Beta Warning
-      console.log(chalk.bold.yellow('⚠️  EARLY BETA - 7.5% Complete (3 of 40 agents implemented)'));
-      console.log(chalk.yellow('   Most agents return placeholder data. See AUDIT_REPORT.md for details.\n'));
+      // Beta Status
+      console.log(chalk.bold.yellow('⚠️  BETA - 50% Complete (20 of 40 agents implemented)'));
+      console.log(chalk.yellow('   Remaining agents return placeholder data. See README.md for details.\n'));
 
       // Validate API key
       const apiKey = process.env.ANTHROPIC_API_KEY;
