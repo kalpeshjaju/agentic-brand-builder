@@ -39,219 +39,80 @@ Return structured, evidence-based market intelligence.`;
 ${previousOutputs}
 
 # Task
-Provide comprehensive market intelligence analysis for this brand's category and market.
+Provide market intelligence analysis for this brand's category and market.
 
-## Market Intelligence Framework
+## Required Analysis
 
 ### 1. Market Overview
-**Market Size & Growth**:
-- Total Addressable Market (TAM)
-- Serviceable Available Market (SAM)
-- Serviceable Obtainable Market (SOM)
-- Historical growth rates (3-5 years)
-- Projected growth rates (3-5 years)
-- Market maturity stage
-
-**Market Segmentation**:
-- Key market segments by size
-- Growth rates by segment
-- Profitability by segment
-- Accessibility by segment
+- Market size: TAM, SAM, SOM
+- Growth: Historical and projected CAGR
+- Maturity stage
+- Key segments by size, growth, profitability
 
 ### 2. Industry Trends
-**Macro Trends**:
-- Economic factors (GDP, inflation, spending)
-- Demographic shifts (age, urbanization, income)
-- Social trends (values, lifestyle changes)
-- Technology disruptions (digital, AI, automation)
-- Environmental concerns (sustainability, climate)
-
-**Category-Specific Trends**:
-- Product innovation trends
-- Channel evolution (online vs. offline)
-- Pricing dynamics
-- Customer behavior shifts
-- New business models
+- Macro trends (economic, demographic, social, technology, environmental)
+- Category trends (innovation, channels, pricing, customer behavior, business models)
 
 ### 3. Competitive Dynamics
-**Market Structure**:
-- Market concentration (fragmented vs. consolidated)
-- Number of major players
-- Barriers to entry (high/medium/low)
-- Switching costs for customers
-- Bargaining power (suppliers, buyers)
+- Market structure: concentration, number of players, barriers to entry
+- Competitive forces: rivalry intensity, entry threats, substitutes, supplier/buyer power
 
-**Competitive Forces**:
-- Intensity of rivalry
-- Threat of new entrants
-- Threat of substitutes
-- Supplier power
-- Buyer power
-
-### 4. Regulatory & Policy Environment
-**Current Regulations**:
-- Industry-specific regulations
-- Quality and safety standards
-- Labeling and advertising rules
-- Trade policies and tariffs
-
-**Regulatory Trends**:
+### 4. Regulatory Environment
+- Key regulations and standards
 - Upcoming policy changes
 - Compliance requirements
-- Industry self-regulation
-- Government initiatives
 
 ### 5. Technology Landscape
-**Current Technology**:
-- Production technologies
-- Distribution technologies
-- Marketing technologies
-- Customer service technologies
-
-**Emerging Technologies**:
-- AI and automation
-- E-commerce and digital platforms
-- Supply chain innovations
-- Sustainable technologies
+- Current technologies (production, distribution, marketing)
+- Emerging technologies (AI, e-commerce, sustainability)
 
 ### 6. Opportunities & Threats
-**Market Opportunities**:
-- Underserved segments
-- Emerging trends to leverage
-- White space in positioning
-- Channel opportunities
-- Geographic expansion
-
-**Market Threats**:
-- Competitive threats
-- Disruptive technologies
-- Regulatory risks
-- Economic risks
-- Supply chain vulnerabilities
+- Market opportunities: underserved segments, trends, white space, channels, geography
+- Market threats: competition, disruption, regulation, economic, supply chain
 
 ### 7. Strategic Implications
-Based on market analysis:
-- Where should the brand focus?
-- What positioning would work?
-- Which segments to prioritize?
-- What timing is right?
-- What resources are needed?
+- Where to focus, what positioning, which segments, timing, resources needed
 
 # Output Format
-Provide structured JSON:
+Return JSON:
 {
   "marketOverview": {
-    "marketSize": {
-      "tam": "₹500 Cr ($60M)",
-      "sam": "₹200 Cr ($24M)",
-      "som": "₹50 Cr ($6M)",
-      "period": "2024"
-    },
-    "growth": {
-      "historicalCAGR": "15%",
-      "projectedCAGR": "18%",
-      "period": "2024-2029"
-    },
-    "maturityStage": "growth",
-    "segmentation": [
-      {
-        "segment": "Premium",
-        "size": "₹100 Cr",
-        "growth": "20%",
-        "profitability": "high"
-      }
-    ]
+    "marketSize": { "tam": "₹X Cr", "sam": "₹X Cr", "som": "₹X Cr", "period": "2024" },
+    "growth": { "historicalCAGR": "X%", "projectedCAGR": "X%", "period": "2024-2029" },
+    "maturityStage": "growth|mature|emerging",
+    "segmentation": [{ "segment": "Name", "size": "₹X Cr", "growth": "X%", "profitability": "high|medium|low" }]
   },
   "industryTrends": {
-    "macroTrends": [
-      {
-        "trend": "Digital transformation",
-        "impact": "high",
-        "direction": "positive",
-        "description": "Increasing online adoption"
-      }
-    ],
-    "categoryTrends": [
-      {
-        "trend": "Sustainability focus",
-        "impact": "medium",
-        "direction": "positive",
-        "description": "Consumers prefer eco-friendly products"
-      }
-    ]
+    "macroTrends": [{ "trend": "Name", "impact": "high|medium|low", "direction": "positive|negative", "description": "Brief" }],
+    "categoryTrends": [{ "trend": "Name", "impact": "high|medium|low", "direction": "positive|negative", "description": "Brief" }]
   },
   "competitiveDynamics": {
-    "marketStructure": {
-      "concentration": "fragmented",
-      "majorPlayers": 15,
-      "marketShare": {
-        "topPlayer": "12%",
-        "top3": "28%",
-        "top5": "40%"
-      }
-    },
-    "competitiveForces": {
-      "rivalryIntensity": "high",
-      "entryBarriers": "medium",
-      "substituteThreat": "medium",
-      "supplierPower": "low",
-      "buyerPower": "high"
-    }
+    "marketStructure": { "concentration": "fragmented|consolidated", "majorPlayers": 0, "marketShare": { "topPlayer": "X%", "top3": "X%", "top5": "X%" } },
+    "competitiveForces": { "rivalryIntensity": "high|medium|low", "entryBarriers": "high|medium|low", "substituteThreat": "high|medium|low", "supplierPower": "high|medium|low", "buyerPower": "high|medium|low" }
   },
   "regulatoryEnvironment": {
-    "keyRegulations": [
-      "Food safety standards",
-      "Labeling requirements"
-    ],
-    "upcomingChanges": [
-      "New e-commerce regulations"
-    ],
-    "complianceLevel": "moderate"
+    "keyRegulations": ["List"],
+    "upcomingChanges": ["List"],
+    "complianceLevel": "high|moderate|low"
   },
   "technologyLandscape": {
-    "current": [
-      "E-commerce platforms",
-      "Digital marketing"
-    ],
-    "emerging": [
-      "AI personalization",
-      "Blockchain for transparency"
-    ],
-    "adoptionLevel": "early majority"
+    "current": ["List current tech"],
+    "emerging": ["List emerging tech"],
+    "adoptionLevel": "early|majority|late"
   },
-  "opportunities": [
-    {
-      "opportunity": "Underserved Tier 2/3 cities",
-      "size": "₹80 Cr",
-      "priority": "high",
-      "timeframe": "0-12 months"
-    }
-  ],
-  "threats": [
-    {
-      "threat": "Aggressive pricing by funded startups",
-      "severity": "high",
-      "probability": "high",
-      "mitigation": "Focus on differentiation, not price"
-    }
-  ],
+  "opportunities": [{ "opportunity": "Description", "size": "₹X Cr", "priority": "high|medium|low", "timeframe": "X months" }],
+  "threats": [{ "threat": "Description", "severity": "high|medium|low", "probability": "high|medium|low", "mitigation": "Strategy" }],
   "strategicImplications": {
-    "keyInsights": [
-      "Market is growing but fragmenting",
-      "Digital channels critical for reach",
-      "Sustainability increasingly important"
-    ],
-    "recommendations": [
-      "Focus on Tier 2 cities for growth",
-      "Build strong online presence",
-      "Emphasize sustainable practices"
-    ]
+    "keyInsights": ["List insights"],
+    "recommendations": ["List recommendations"]
   },
   "confidence": 0.80
-}`;
+}
+
+Focus on actionable insights. Use realistic market estimates for India.`;
 
     const response = await this.callClaude(systemPrompt, userPrompt, {
-      maxTokens: 10000
+      maxTokens: 6000
     });
 
     try {
