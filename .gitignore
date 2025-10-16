@@ -1,29 +1,29 @@
 # Dependencies
 node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Build outputs
-dist/
-build/
-*.tsbuildinfo
-
-# Environment variables
+# Environment
 .env
 .env.local
 .env.*.local
 
-# Outputs
-outputs/**/*.html
-outputs/**/*.pdf
-outputs/**/*.json
-!outputs/.gitkeep
+# State and cache
+.maker-checker-state/
+.maker-checker-costs/
+.cache/
 
-# Logs
-logs/
-*.log
-npm-debug.log*
+# Deep review outputs (local only)
+.deep-reviews/
+.deep-review-temp/
+
+# Build outputs
+dist/
+build/
+*.js
+*.js.map
+!scripts/**/*.js
 
 # IDE
 .vscode/
@@ -31,20 +31,11 @@ npm-debug.log*
 *.swp
 *.swo
 *~
+
+# OS
 .DS_Store
+Thumbs.db
 
-# Testing
-coverage/
-.nyc_output/
-
-# Temp files
-tmp/
-temp/
-*.tmp
-
-# Screenshots
-screenshots/
-*.png
-*.jpg
-*.jpeg
-!docs/assets/**
+# Logs
+logs/
+*.log

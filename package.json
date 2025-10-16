@@ -12,7 +12,10 @@
     "test": "vitest",
     "test:watch": "vitest --watch",
     "orchestrate": "tsx src/cli.ts orchestrate",
-    "analyze": "tsx src/cli.ts analyze"
+    "analyze": "tsx src/cli.ts analyze",
+    "detect-deep-review": "tsx scripts/orchestrator/deep-review-detector.ts",
+    "review:deep": "tsx scripts/local/deep-review.ts",
+    "review:deep:help": "tsx scripts/local/deep-review.ts --help"
   },
   "keywords": [
     "brand-intelligence",
