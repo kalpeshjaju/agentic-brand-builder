@@ -36,22 +36,38 @@ export class RateLimiter {
   }
 
   /**
-   * Record a request
+   * Record a request (with automatic pruning)
    */
   recordRequest(): void {
-    this.requests.push(Date.now());
+    const now = Date.now();
+    const windowStart = now - this.config.windowMs;
+
+    // Prune old entries before adding new one
+    this.requests = this.requests.filter(time => time > windowStart);
+    this.requests.push(now);
   }
 
   /**
-   * Wait until a request slot is available
+   * Wait until a request slot is available (atomic check+record)
    */
   async waitForSlot(): Promise<void> {
-    while (!(await this.canMakeRequest())) {
+    while (true) {
+      const now = Date.now();
+      const windowStart = now - this.config.windowMs;
+
+      // Atomic operation: prune, check, and record in single tick
+      this.requests = this.requests.filter(time => time > windowStart);
+
+      if (this.requests.length < this.config.maxRequests) {
+        // Slot available - record immediately (no async gap)
+        this.requests.push(now);
+        return;
+      }
+
+      // No slot available - wait before retrying
       const waitTime = this.getWaitTime();
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
-
-    this.recordRequest();
   }
 
   /**
@@ -78,10 +94,13 @@ export class RateLimiter {
     const windowStart = now - this.config.windowMs;
     this.requests = this.requests.filter(time => time > windowStart);
 
+    const requestCount = this.requests.length;
+    const utilization = (requestCount / this.config.maxRequests) * 100;
+
     return {
-      requestsInWindow: this.requests.length,
-      slotsAvailable: this.config.maxRequests - this.requests.length,
-      utilizationPercent: (this.requests.length / this.config.maxRequests) * 100
+      requestsInWindow: requestCount,
+      slotsAvailable: Math.max(0, this.config.maxRequests - requestCount),
+      utilizationPercent: Math.min(100, Math.max(0, utilization))
     };
   }
 }
