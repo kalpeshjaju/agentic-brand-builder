@@ -4,10 +4,12 @@ import type {
   StageResult,
   QualityGate
 } from '../types/index.js';
-import { Stage, StageStatus, AgentStatus } from '../types/index.js';
+import { Stage, StageStatus, AgentStatus, AgentType } from '../types/index.js';
 import { StageOrchestrator } from '../stages/stage-orchestrator.js';
 import { ContextManager } from '../config/context-manager.js';
 import chalk from 'chalk';
+import { writeFileSync, mkdirSync } from 'fs';
+import { resolve } from 'path';
 
 /**
  * Master Orchestrator - Coordinates all 6 stages of brand intelligence generation
@@ -66,7 +68,14 @@ export class MasterOrchestrator {
       const totalDurationMs = Date.now() - startTime;
       const overallStatus = this.determineOverallStatus(stageResults);
 
+      // Extract and persist production artifacts from Stage 6
+      const outputs = await this.persistProductionOutputs(stageResults);
+
       console.log(chalk.bold.green(`\n✅ Orchestration completed in ${(totalDurationMs / 1000).toFixed(2)}s`));
+      if (outputs.length > 0) {
+        console.log(chalk.green(`📦 Generated ${outputs.length} output file(s):`));
+        outputs.forEach(output => console.log(chalk.gray(`   - ${output.path}`)));
+      }
 
       return {
         brandContext: this.config.brandContext,
@@ -75,7 +84,7 @@ export class MasterOrchestrator {
         startedAt: new Date(startTime),
         completedAt: new Date(),
         totalDurationMs,
-        outputs: [] // Will be populated by production stage
+        outputs
       };
     } catch (error) {
       const totalDurationMs = Date.now() - startTime;
@@ -263,5 +272,72 @@ export class MasterOrchestrator {
       [Stage.PRODUCTION]: 'Production & Output Generation'
     };
     return names[stage];
+  }
+
+  /**
+   * Persist production outputs to disk
+   * Extracts HTML/CSS/assets from Stage 6 agents and writes them to files
+   */
+  private async persistProductionOutputs(stageResults: StageResult[]): Promise<Array<{
+    format: string;
+    path: string;
+  }>> {
+    const outputs: Array<{ format: string; path: string }> = [];
+
+    // Find the production stage result
+    const productionStage = stageResults.find(result => result.stage === Stage.PRODUCTION);
+    if (!productionStage || productionStage.status !== StageStatus.COMPLETED) {
+      // No production stage or it failed, return empty
+      return outputs;
+    }
+
+    // Create output directory
+    const outputDir = resolve(process.cwd(), 'outputs');
+    try {
+      mkdirSync(outputDir, { recursive: true });
+    } catch (error) {
+      console.log(chalk.yellow(`⚠️  Could not create output directory: ${(error as Error).message}`));
+      return outputs;
+    }
+
+    // Process each production agent output
+    for (const agentOutput of productionStage.agentOutputs) {
+      try {
+        // Only process successful outputs
+        if (agentOutput.status !== AgentStatus.COMPLETED || !agentOutput.data) {
+          continue;
+        }
+
+        // Handle HTML Generator output
+        if (agentOutput.agentType === AgentType.HTML_GENERATOR) {
+          const data = agentOutput.data as {
+            html?: {
+              filename?: string;
+              content?: string;
+            };
+          };
+
+          if (data.html?.content && data.html?.filename) {
+            const filePath = resolve(outputDir, data.html.filename);
+            writeFileSync(filePath, data.html.content, 'utf-8');
+
+            outputs.push({
+              format: 'html',
+              path: filePath
+            });
+          }
+        }
+
+        // Future: Handle PDF_GENERATOR, ASSET_OPTIMIZER when implemented
+        // if (agentOutput.agentType === AgentType.PDF_GENERATOR) { ... }
+
+      } catch (error) {
+        console.log(chalk.yellow(
+          `⚠️  Could not persist output from ${agentOutput.agentType}: ${(error as Error).message}`
+        ));
+      }
+    }
+
+    return outputs;
   }
 }

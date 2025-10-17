@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Agent, AgentConfig, AgentInput, AgentOutput, AgentStatus } from '../types/index.js';
+import { claudeRateLimiter } from '../utils/rate-limiter.js';
 
 export abstract class BaseAgent implements Agent {
   protected client: Anthropic;
@@ -101,6 +102,7 @@ export abstract class BaseAgent implements Agent {
 
   /**
    * Helper method to call Claude API
+   * Includes automatic rate limiting to prevent hitting API limits
    */
   protected async callClaude(
     systemPrompt: string,
@@ -113,6 +115,10 @@ export abstract class BaseAgent implements Agent {
     content: string;
     tokensUsed: number;
   }> {
+    // Wait for rate limiter slot before making request
+    // This prevents parallel agents from overwhelming the API
+    await claudeRateLimiter.waitForSlot();
+
     const response = await this.client.messages.create({
       model: this.config.model,
       max_tokens: options?.maxTokens || 8000,
@@ -158,18 +164,47 @@ ${context.customInstructions ? `\n**Custom Instructions**:\n${context.customInst
 
   /**
    * Format previous stage outputs for context
+   * IMPORTANT: Limits output size to prevent unbounded prompt growth
+   * as stages accumulate. Without this, prompt size grows exponentially.
    */
   protected formatPreviousOutputs(input: AgentInput): string {
     if (!input.previousStageOutputs || Object.keys(input.previousStageOutputs).length === 0) {
       return '';
     }
 
+    // Budget: max 5000 chars per stage output, max 20000 chars total
+    const MAX_CHARS_PER_STAGE = 5000;
+    const MAX_TOTAL_CHARS = 20000;
+
+    let totalChars = 0;
+    const formattedOutputs: string[] = [];
+
+    for (const [key, value] of Object.entries(input.previousStageOutputs)) {
+      if (totalChars >= MAX_TOTAL_CHARS) {
+        formattedOutputs.push(`\n## [Additional stages truncated to stay within prompt budget]`);
+        break;
+      }
+
+      const jsonString = JSON.stringify(value, null, 2);
+
+      if (jsonString.length <= MAX_CHARS_PER_STAGE) {
+        // Fits within budget, include full output
+        formattedOutputs.push(`## ${key}\n\n${jsonString}`);
+        totalChars += jsonString.length;
+      } else {
+        // Too large, truncate with warning
+        const truncated = jsonString.substring(0, MAX_CHARS_PER_STAGE);
+        formattedOutputs.push(
+          `## ${key}\n\n${truncated}\n\n[Truncated: ${jsonString.length} chars → ${MAX_CHARS_PER_STAGE} chars to prevent prompt overflow]`
+        );
+        totalChars += MAX_CHARS_PER_STAGE;
+      }
+    }
+
     return `
 # Previous Stage Outputs
 
-${Object.entries(input.previousStageOutputs)
-    .map(([key, value]) => `## ${key}\n\n${JSON.stringify(value, null, 2)}`)
-    .join('\n\n')}
+${formattedOutputs.join('\n\n')}
     `.trim();
   }
 }

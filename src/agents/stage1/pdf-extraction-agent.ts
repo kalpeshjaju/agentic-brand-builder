@@ -1,7 +1,8 @@
 import { BaseAgent } from '../base-agent.js';
 import type { AgentInput } from '../../types/index.js';
-import { existsSync } from 'fs';
+import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
+import pdfParse from 'pdf-parse';
 
 /**
  * PDF Extraction Agent
@@ -39,6 +40,7 @@ export class PdfExtractionAgent extends BaseAgent {
     // Extract text from all PDFs
     const extractedDocuments = [];
     const sources = [];
+    let totalTokensUsed = 0;
 
     for (const pdfSource of pdfSources) {
       try {
@@ -55,52 +57,69 @@ export class PdfExtractionAgent extends BaseAgent {
           continue;
         }
 
-        // For now, we'll use Claude to analyze the PDF content
-        // In production, you'd use pdf-parse library first
+        // Step 1: Extract actual text from PDF using pdf-parse
+        const pdfBuffer = readFileSync(pdfPath);
+        const pdfData = await pdfParse(pdfBuffer);
+
+        // Validate we got text
+        if (!pdfData.text || pdfData.text.trim().length === 0) {
+          extractedDocuments.push({
+            source: pdfSource.path,
+            description: pdfSource.description,
+            error: 'PDF contains no extractable text',
+            extracted: false
+          });
+          continue;
+        }
+
+        // Step 2: Use Claude to structure the ACTUAL extracted text
         const systemPrompt = `You are a PDF extraction specialist. Your role is to:
-1. Extract key information from PDF documents
+1. Analyze REAL text extracted from PDF documents
 2. Identify tables, financial data, product information
 3. Structure the data in a clear, usable format
 4. Preserve important context and relationships
+
+CRITICAL: Only extract information that is ACTUALLY PRESENT in the provided text.
+Do NOT fabricate or assume typical content. Return NULL for missing data.
 
 Return structured JSON with extracted data.`;
 
         const userPrompt = `${brandContext}
 
 # Task
-Analyze the PDF document and extract key information.
+Analyze the ACTUAL text extracted from this PDF and structure key information.
 
 **PDF Source**: ${pdfSource.path}
 **Description**: ${pdfSource.description || 'No description'}
+**Page Count**: ${pdfData.numpages}
+**Metadata**: ${JSON.stringify(pdfData.info || {})}
 
-Since this is a text-based extraction, I'll provide you with what would typically be extracted from this PDF type.
+# ACTUAL EXTRACTED TEXT (from pdf-parse)
+\`\`\`
+${pdfData.text.substring(0, 50000)}
+\`\`\`
 
-# Expected Data Types
-Based on the description, extract:
-- Financial metrics (revenue, growth, margins)
-- Product information (names, categories, pricing)
-- Customer data (segments, demographics)
-- Market data (size, trends, competitors)
-- Key insights and highlights
+${pdfData.text.length > 50000 ? '(Text truncated at 50k chars for token efficiency)\n' : ''}
 
 # Output Format
-Provide a structured JSON response:
+Provide a structured JSON response with ONLY data found in the text above:
 {
   "documentType": "investor_report|catalog|research|other",
   "extractedData": {
-    "financials": { /* revenue, growth, etc */ },
-    "products": [ /* product list */ ],
-    "customers": { /* customer data */ },
-    "market": { /* market insights */ },
-    "keyInsights": [ /* important findings */ ]
+    "financials": { /* revenue, growth, etc - ONLY if present */ },
+    "products": [ /* product list - ONLY if present */ ],
+    "customers": { /* customer data - ONLY if present */ },
+    "market": { /* market insights - ONLY if present */ },
+    "keyInsights": [ /* important findings from text */ ]
   },
   "metadata": {
     "fileName": "${pdfSource.path}",
     "description": "${pdfSource.description}",
     "extractionDate": "${new Date().toISOString()}",
-    "pageCount": "estimated"
+    "pageCount": ${pdfData.numpages},
+    "textLength": ${pdfData.text.length}
   },
-  "confidence": 0.85
+  "confidence": 0.XX
 }`;
 
         const response = await this.callClaude(systemPrompt, userPrompt, {
@@ -127,10 +146,12 @@ Provide a structured JSON response:
           source: pdfSource.path,
           description: pdfSource.description,
           extracted: true,
-          data: extractedData
+          data: extractedData,
+          tokensUsed: response.tokensUsed
         });
 
         sources.push(pdfSource.path);
+        totalTokensUsed += response.tokensUsed;
 
       } catch (error) {
         extractedDocuments.push({
@@ -159,7 +180,7 @@ Provide a structured JSON response:
           filesFailed: pdfSources.length - successfulExtractions
         }
       },
-      tokensUsed: successfulExtractions * 4000, // Rough estimate
+      tokensUsed: totalTokensUsed, // Actual token usage from API responses
       confidence: overallConfidence,
       sources
     };
