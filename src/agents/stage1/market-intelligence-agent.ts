@@ -304,7 +304,7 @@ Provide structured JSON:
       return {
         data,
         tokensUsed: response.tokensUsed,
-        confidence: typedData.confidence || 0.75,
+        confidence: typedData.confidence ?? 0.75,
         sources: ['market_intelligence']
       };
     } catch (error) {

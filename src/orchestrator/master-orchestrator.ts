@@ -2,10 +2,9 @@ import type {
   OrchestrationConfig,
   OrchestrationResult,
   StageResult,
-  StageStatus,
   QualityGate
 } from '../types/index.js';
-import { Stage } from '../types/index.js';
+import { Stage, StageStatus, AgentStatus } from '../types/index.js';
 import { StageOrchestrator } from '../stages/stage-orchestrator.js';
 import { ContextManager } from '../config/context-manager.js';
 import chalk from 'chalk';
@@ -111,9 +110,13 @@ export class MasterOrchestrator {
 
       const durationMs = Date.now() - startTime;
 
+      // Check if any agents failed within this stage
+      const hasFailedAgents = agentOutputs.some(output => output.status === AgentStatus.FAILED);
+      const stageStatus = hasFailedAgents ? StageStatus.FAILED : StageStatus.COMPLETED;
+
       return {
         stage,
-        status: 'completed' as StageStatus,
+        status: stageStatus,
         agentOutputs,
         startedAt: new Date(startTime),
         completedAt: new Date(),
