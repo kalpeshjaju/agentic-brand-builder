@@ -67,6 +67,18 @@ export class StageOrchestrator {
 
   /**
    * Get agents required for each stage
+   *
+   * IMPORTANT: Only includes IMPLEMENTED agents. Unimplemented agents
+   * have been removed to prevent PlaceholderAgent from silently returning
+   * mock data that appears successful but is meaningless.
+   *
+   * Removed (not yet implemented):
+   * - Stage 1: VISUAL_IDENTITY_AUDITOR, UX_AUDITOR
+   * - Stage 2: ROI_CALCULATOR, BUDGET_ALLOCATION
+   * - Stage 3: RESOURCE_PLANNING, RISK_IDENTIFICATION, MITIGATION_STRATEGY
+   * - Stage 4: TECHNICAL_SPEC_WRITER, NARRATIVE_FLOW, NAVIGATION_BUILDER
+   * - Stage 5: FACT_VERIFICATION, CONTRADICTION_DETECTOR, STRATEGIC_AUDITOR, GAP_ANALYZER
+   * - Stage 6: ASSET_OPTIMIZER, PDF_GENERATOR
    */
   private getAgentsForStage(stage: Stage): AgentType[] {
     const stageAgents: Record<Stage, AgentType[]> = {
@@ -77,8 +89,8 @@ export class StageOrchestrator {
         AgentType.COMPETITOR_RESEARCH,
         AgentType.MARKET_INTELLIGENCE,
         AgentType.PRICING_INTELLIGENCE,
-        AgentType.VISUAL_IDENTITY_AUDITOR,
-        AgentType.UX_AUDITOR
+        AgentType.MARKET_OVERVIEW,
+        AgentType.MARKET_DYNAMICS
       ],
       [Stage.ANALYSIS]: [
         AgentType.REVIEW_ANALYSIS,
@@ -86,37 +98,23 @@ export class StageOrchestrator {
         AgentType.JOBS_TO_BE_DONE,
         AgentType.POSITIONING_MAPPER,
         AgentType.DIFFERENTIATION_ANALYZER,
-        AgentType.FINANCIAL_PROJECTION,
-        AgentType.ROI_CALCULATOR,
-        AgentType.BUDGET_ALLOCATION
+        AgentType.FINANCIAL_PROJECTION
       ],
       [Stage.INTELLIGENCE]: [
         AgentType.POSITIONING_STRATEGY,
         AgentType.MESSAGING_ARCHITECTURE,
         AgentType.BRAND_NARRATIVE,
-        AgentType.ROADMAP_PLANNING,
-        AgentType.RESOURCE_PLANNING,
-        AgentType.RISK_IDENTIFICATION,
-        AgentType.MITIGATION_STRATEGY
+        AgentType.ROADMAP_PLANNING
       ],
       [Stage.STRATEGY]: [
         AgentType.STRATEGIC_DOCUMENT_WRITER,
-        AgentType.EXECUTIVE_SUMMARY_WRITER,
-        AgentType.TECHNICAL_SPEC_WRITER,
-        AgentType.NARRATIVE_FLOW,
-        AgentType.NAVIGATION_BUILDER
+        AgentType.EXECUTIVE_SUMMARY_WRITER
       ],
       [Stage.VALIDATION]: [
-        AgentType.CONSISTENCY_CHECKER,
-        AgentType.FACT_VERIFICATION,
-        AgentType.CONTRADICTION_DETECTOR,
-        AgentType.STRATEGIC_AUDITOR,
-        AgentType.GAP_ANALYZER
+        AgentType.CONSISTENCY_CHECKER
       ],
       [Stage.PRODUCTION]: [
-        AgentType.HTML_GENERATOR,
-        AgentType.ASSET_OPTIMIZER,
-        AgentType.PDF_GENERATOR
+        AgentType.HTML_GENERATOR
       ]
     };
 

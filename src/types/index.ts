@@ -32,6 +32,8 @@ export enum AgentType {
   ENTITY_RECOGNITION = 'entity_recognition',
   COMPETITOR_RESEARCH = 'competitor_research',
   MARKET_INTELLIGENCE = 'market_intelligence',
+  MARKET_OVERVIEW = 'market_overview',
+  MARKET_DYNAMICS = 'market_dynamics',
   PRICING_INTELLIGENCE = 'pricing_intelligence',
   VISUAL_IDENTITY_AUDITOR = 'visual_identity_auditor',
   PACKAGING_DESIGN_AUDITOR = 'packaging_design_auditor',

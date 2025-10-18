@@ -1,6 +1,5 @@
 import type { Agent, AgentConfig } from '../types/index.js';
 import { AgentType } from '../types/index.js';
-import { BaseAgent } from './base-agent.js';
 
 // Import example agents
 import { CompetitorResearchAgent } from './stage1/competitor-research-agent.js';
@@ -8,6 +7,8 @@ import { PdfExtractionAgent } from './stage1/pdf-extraction-agent.js';
 import { DataNormalizationAgent } from './stage1/data-normalization-agent.js';
 import { EntityRecognitionAgent } from './stage1/entity-recognition-agent.js';
 import { MarketIntelligenceAgent } from './stage1/market-intelligence-agent.js';
+import { MarketOverviewAgent } from './stage1/market-overview-agent.js';
+import { MarketDynamicsAgent } from './stage1/market-dynamics-agent.js';
 import { PricingIntelligenceAgent } from './stage1/pricing-intelligence-agent.js';
 import { ReviewAnalysisAgent } from './stage2/review-analysis-agent.js';
 import { SegmentationAgent } from './stage2/segmentation-agent.js';
@@ -60,6 +61,12 @@ export class AgentFactory {
       case AgentType.MARKET_INTELLIGENCE:
         return new MarketIntelligenceAgent(config, this.apiKey);
 
+      case AgentType.MARKET_OVERVIEW:
+        return new MarketOverviewAgent(config, this.apiKey);
+
+      case AgentType.MARKET_DYNAMICS:
+        return new MarketDynamicsAgent(config, this.apiKey);
+
       case AgentType.PRICING_INTELLIGENCE:
         return new PricingIntelligenceAgent(config, this.apiKey);
 
@@ -110,9 +117,16 @@ export class AgentFactory {
       case AgentType.HTML_GENERATOR:
         return new HtmlGeneratorAgent(config, this.apiKey);
 
-      // For agents not yet implemented, use a placeholder
+      // For agents not yet implemented, throw an error
+      // This prevents silent failures where stages appear to succeed
+      // but are built on meaningless placeholder data
       default:
-        return new PlaceholderAgent(config, this.apiKey, type);
+        throw new Error(
+          `Agent type '${type}' is not yet implemented. ` +
+          'This agent has been removed from stage schedules to prevent ' +
+          'hallucinated/placeholder data from propagating through the pipeline. ' +
+          'If you need this agent, implement it first before adding to the schedule.'
+        );
     }
   }
 
@@ -126,41 +140,6 @@ export class AgentFactory {
       timeout: 300000, // 5 minutes
       model: this.defaultModel,
       temperature: 0.3 // Lower temperature for more consistent outputs
-    };
-  }
-}
-
-/**
- * Placeholder agent for agents not yet implemented
- * Returns mock data to allow system testing
- */
-class PlaceholderAgent extends BaseAgent {
-  private agentType: AgentType;
-
-  constructor(config: AgentConfig, apiKey: string, agentType: AgentType) {
-    super(config, apiKey);
-    this.agentType = agentType;
-  }
-
-  protected async run(input: import('../types/index.js').AgentInput): Promise<{
-    data: unknown;
-    tokensUsed?: number;
-    confidence?: number;
-    sources?: string[];
-  }> {
-    // Simulate processing time
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    return {
-      data: {
-        placeholder: true,
-        agentType: this.agentType,
-        message: `Agent ${this.agentType} not yet implemented - placeholder data`,
-        brandName: input.context.brandName
-      },
-      tokensUsed: 100,
-      confidence: 0.5,
-      sources: ['placeholder']
     };
   }
 }

@@ -139,10 +139,13 @@ Provide structured JSON:
 
       const typedData = data as { confidence?: number };
 
+      // IMPORTANT: Use ?? (nullish coalescing) instead of || to preserve genuine 0 values
+      // A confidence of 0 is valid and meaningful (complete uncertainty)
+      // Using || would incorrectly convert 0 → 0.85, masking uncertainty
       return {
         data,
         tokensUsed: response.tokensUsed,
-        confidence: typedData.confidence || 0.85,
+        confidence: typedData.confidence ?? 0.85,
         sources: ['data_normalization']
       };
     } catch (error) {
