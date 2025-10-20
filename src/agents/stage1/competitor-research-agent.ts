@@ -107,28 +107,17 @@ Provide a COMPACT, VALID JSON response with:
         // Strategy 1 failed, try strategy 2
       }
 
-      // Strategy 2: If parsing failed, return simplified placeholder data
+      // Strategy 2: If parsing failed, throw error with debugging info
       if (!data) {
-        data = {
-          competitors: input.context.competitors.map((comp: string) => ({
-            name: comp,
-            positioning: 'Placeholder - competitor analysis data',
-            targetAudience: 'Analysis not available',
-            pricingStrategy: 'unknown',
-            keyDifferentiators: ['Placeholder data'],
-            brandMessaging: { tone: 'Unknown', keyMessages: [], valuePropositions: [] },
-            strengths: ['Data not available'],
-            weaknesses: ['Data not available']
-          })),
-          marketGaps: ['Full analysis encountered parsing issues - use placeholder data'],
-          opportunities: ['Recommend manual competitive research'],
-          confidence: 0.3,
-          sources: ['partial_analysis'],
-          note: 'JSON parsing failed - placeholder data returned'
-        };
+        throw new Error(
+          'Failed to parse JSON from Claude response. ' +
+          `Response length: ${content.length} chars. ` +
+          `First 500 chars: ${content.substring(0, 500)}... ` +
+          'Please check if Claude returned valid JSON format.'
+        );
       }
 
-      // Type assertion - we know data structure from either Claude or placeholder
+      // Type assertion - we know data structure from Claude response
       const typedData = data as { confidence?: number; sources?: string[] };
 
       return {

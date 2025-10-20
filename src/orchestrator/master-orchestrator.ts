@@ -2,26 +2,36 @@ import type {
   OrchestrationConfig,
   OrchestrationResult,
   StageResult,
-  StageStatus,
   QualityGate
 } from '../types/index.js';
-import { Stage } from '../types/index.js';
+import { Stage, StageStatus, AgentStatus, AgentType } from '../types/index.js';
 import { StageOrchestrator } from '../stages/stage-orchestrator.js';
 import { ContextManager } from '../config/context-manager.js';
 import chalk from 'chalk';
+import { writeFileSync, mkdirSync } from 'fs';
+import { resolve } from 'path';
 
 /**
  * Master Orchestrator - Coordinates all 6 stages of brand intelligence generation
+ * Includes cost tracking and budget controls
  */
 export class MasterOrchestrator {
   private config: OrchestrationConfig;
   private contextManager: ContextManager;
   private stageOrchestrator: StageOrchestrator;
+  private totalTokensUsed: number = 0;
+  private totalCostUSD: number = 0;
+  // Default budget: 500K tokens (~$1.50 for Claude Sonnet)
+  private readonly maxTokenBudget: number = 500_000;
+  private readonly costPerMillionTokens: number = 3.00; // Claude Sonnet pricing
 
-  constructor(config: OrchestrationConfig, apiKey: string) {
+  constructor(config: OrchestrationConfig, apiKey: string, maxTokenBudget?: number) {
     this.config = config;
     this.contextManager = new ContextManager(config.brandContext);
     this.stageOrchestrator = new StageOrchestrator(apiKey, config.parallelAgents);
+    if (maxTokenBudget) {
+      this.maxTokenBudget = maxTokenBudget;
+    }
   }
 
   /**
@@ -42,6 +52,39 @@ export class MasterOrchestrator {
 
         const stageResult = await this.executeStage(stage, stageResults);
         stageResults.push(stageResult);
+
+        // Track token usage and cost
+        const stageTokens = stageResult.agentOutputs.reduce(
+          (sum, output) => sum + (output.metadata.tokensUsed || 0),
+          0
+        );
+        this.totalTokensUsed += stageTokens;
+        this.totalCostUSD = (this.totalTokensUsed / 1_000_000) * this.costPerMillionTokens;
+
+        // Display cost tracking
+        console.log(chalk.gray(
+          `💰 Stage tokens: ${stageTokens.toLocaleString()} | ` +
+          `Total: ${this.totalTokensUsed.toLocaleString()}/${this.maxTokenBudget.toLocaleString()} ` +
+          `($${this.totalCostUSD.toFixed(2)})`
+        ));
+
+        // Check budget limit
+        if (this.totalTokensUsed > this.maxTokenBudget) {
+          throw new Error(
+            `Budget exceeded: ${this.totalTokensUsed.toLocaleString()} tokens used ` +
+            `(limit: ${this.maxTokenBudget.toLocaleString()}). ` +
+            `Cost: $${this.totalCostUSD.toFixed(2)}. Stopping orchestration to prevent runaway costs.`
+          );
+        }
+
+        // Warn if approaching budget (80% threshold)
+        const budgetUsagePercent = (this.totalTokensUsed / this.maxTokenBudget) * 100;
+        if (budgetUsagePercent >= 80 && budgetUsagePercent < 100) {
+          console.log(chalk.yellow(
+            `⚠️  Warning: ${budgetUsagePercent.toFixed(1)}% of token budget used. ` +
+            `Remaining: ${(this.maxTokenBudget - this.totalTokensUsed).toLocaleString()} tokens`
+          ));
+        }
 
         // Check quality gate
         const qualityGate = await this.checkQualityGate(stage, stageResult);
@@ -67,7 +110,18 @@ export class MasterOrchestrator {
       const totalDurationMs = Date.now() - startTime;
       const overallStatus = this.determineOverallStatus(stageResults);
 
+      // Extract and persist production artifacts from Stage 6
+      const outputs = await this.persistProductionOutputs(stageResults);
+
       console.log(chalk.bold.green(`\n✅ Orchestration completed in ${(totalDurationMs / 1000).toFixed(2)}s`));
+      console.log(chalk.green(
+        `💰 Total cost: $${this.totalCostUSD.toFixed(2)} ` +
+        `(${this.totalTokensUsed.toLocaleString()} tokens)`
+      ));
+      if (outputs.length > 0) {
+        console.log(chalk.green(`📦 Generated ${outputs.length} output file(s):`));
+        outputs.forEach(output => console.log(chalk.gray(`   - ${output.path}`)));
+      }
 
       return {
         brandContext: this.config.brandContext,
@@ -76,7 +130,7 @@ export class MasterOrchestrator {
         startedAt: new Date(startTime),
         completedAt: new Date(),
         totalDurationMs,
-        outputs: [] // Will be populated by production stage
+        outputs
       };
     } catch (error) {
       const totalDurationMs = Date.now() - startTime;
@@ -111,9 +165,13 @@ export class MasterOrchestrator {
 
       const durationMs = Date.now() - startTime;
 
+      // Check if any agents failed within this stage
+      const hasFailedAgents = agentOutputs.some(output => output.status === AgentStatus.FAILED);
+      const stageStatus = hasFailedAgents ? StageStatus.FAILED : StageStatus.COMPLETED;
+
       return {
         stage,
-        status: 'completed' as StageStatus,
+        status: stageStatus,
         agentOutputs,
         startedAt: new Date(startTime),
         completedAt: new Date(),
@@ -260,5 +318,72 @@ export class MasterOrchestrator {
       [Stage.PRODUCTION]: 'Production & Output Generation'
     };
     return names[stage];
+  }
+
+  /**
+   * Persist production outputs to disk
+   * Extracts HTML/CSS/assets from Stage 6 agents and writes them to files
+   */
+  private async persistProductionOutputs(stageResults: StageResult[]): Promise<Array<{
+    format: string;
+    path: string;
+  }>> {
+    const outputs: Array<{ format: string; path: string }> = [];
+
+    // Find the production stage result
+    const productionStage = stageResults.find(result => result.stage === Stage.PRODUCTION);
+    if (!productionStage || productionStage.status !== StageStatus.COMPLETED) {
+      // No production stage or it failed, return empty
+      return outputs;
+    }
+
+    // Create output directory
+    const outputDir = resolve(process.cwd(), 'outputs');
+    try {
+      mkdirSync(outputDir, { recursive: true });
+    } catch (error) {
+      console.log(chalk.yellow(`⚠️  Could not create output directory: ${(error as Error).message}`));
+      return outputs;
+    }
+
+    // Process each production agent output
+    for (const agentOutput of productionStage.agentOutputs) {
+      try {
+        // Only process successful outputs
+        if (agentOutput.status !== AgentStatus.COMPLETED || !agentOutput.data) {
+          continue;
+        }
+
+        // Handle HTML Generator output
+        if (agentOutput.agentType === AgentType.HTML_GENERATOR) {
+          const data = agentOutput.data as {
+            html?: {
+              filename?: string;
+              content?: string;
+            };
+          };
+
+          if (data.html?.content && data.html?.filename) {
+            const filePath = resolve(outputDir, data.html.filename);
+            writeFileSync(filePath, data.html.content, 'utf-8');
+
+            outputs.push({
+              format: 'html',
+              path: filePath
+            });
+          }
+        }
+
+        // Future: Handle PDF_GENERATOR, ASSET_OPTIMIZER when implemented
+        // if (agentOutput.agentType === AgentType.PDF_GENERATOR) { ... }
+
+      } catch (error) {
+        console.log(chalk.yellow(
+          `⚠️  Could not persist output from ${agentOutput.agentType}: ${(error as Error).message}`
+        ));
+      }
+    }
+
+    return outputs;
   }
 }

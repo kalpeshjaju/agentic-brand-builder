@@ -1,9 +1,11 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { Agent, AgentConfig, AgentInput, AgentOutput, AgentStatus } from '../types/index.js';
+import { claudeRateLimiter } from '../utils/rate-limiter.js';
 
 export abstract class BaseAgent implements Agent {
   protected client: Anthropic;
   public config: AgentConfig;
+  private activeTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(config: AgentConfig, apiKey: string) {
     this.config = config;
@@ -14,6 +16,9 @@ export abstract class BaseAgent implements Agent {
    * Execute the agent with retry logic
    */
   async execute(input: AgentInput): Promise<AgentOutput> {
+    // Validate input before execution
+    this.validateInput(input);
+
     const startTime = Date.now();
     let lastError: Error | undefined;
 
@@ -65,10 +70,19 @@ export abstract class BaseAgent implements Agent {
     confidence?: number;
     sources?: string[];
   }> {
-    return Promise.race([
-      this.run(input),
-      this.timeout()
-    ]);
+    try {
+      const result = await Promise.race([
+        this.run(input),
+        this.timeout()
+      ]);
+      // Clear timer if run() completes first
+      this.clearTimer();
+      return result;
+    } catch (error) {
+      // Clear timer on error
+      this.clearTimer();
+      throw error;
+    }
   }
 
   /**
@@ -76,10 +90,20 @@ export abstract class BaseAgent implements Agent {
    */
   private timeout(): Promise<never> {
     return new Promise((_, reject) => {
-      setTimeout(() => {
+      this.activeTimer = setTimeout(() => {
         reject(new Error(`Agent ${this.config.type} timed out after ${this.config.timeout}ms`));
       }, this.config.timeout);
     });
+  }
+
+  /**
+   * Clear active timer to prevent memory leak
+   */
+  private clearTimer(): void {
+    if (this.activeTimer) {
+      clearTimeout(this.activeTimer);
+      this.activeTimer = null;
+    }
   }
 
   /**
@@ -87,6 +111,25 @@ export abstract class BaseAgent implements Agent {
    */
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
+  /**
+   * Validate agent input
+   * Throws error if required fields are missing
+   */
+  protected validateInput(input: AgentInput): void {
+    if (!input) {
+      throw new Error('Agent input is required');
+    }
+    if (!input.context) {
+      throw new Error('Brand context is required');
+    }
+    if (!input.context.brandName) {
+      throw new Error('Brand name is required in context');
+    }
+    if (!input.context.category) {
+      throw new Error('Brand category is required in context');
+    }
   }
 
   /**
@@ -101,6 +144,7 @@ export abstract class BaseAgent implements Agent {
 
   /**
    * Helper method to call Claude API
+   * Includes automatic rate limiting to prevent hitting API limits
    */
   protected async callClaude(
     systemPrompt: string,
@@ -113,6 +157,10 @@ export abstract class BaseAgent implements Agent {
     content: string;
     tokensUsed: number;
   }> {
+    // Wait for rate limiter slot before making request
+    // This prevents parallel agents from overwhelming the API
+    await claudeRateLimiter.waitForSlot();
+
     const response = await this.client.messages.create({
       model: this.config.model,
       max_tokens: options?.maxTokens || 8000,
@@ -158,18 +206,47 @@ ${context.customInstructions ? `\n**Custom Instructions**:\n${context.customInst
 
   /**
    * Format previous stage outputs for context
+   * IMPORTANT: Limits output size to prevent unbounded prompt growth
+   * as stages accumulate. Without this, prompt size grows exponentially.
    */
   protected formatPreviousOutputs(input: AgentInput): string {
     if (!input.previousStageOutputs || Object.keys(input.previousStageOutputs).length === 0) {
       return '';
     }
 
+    // Budget: max 5000 chars per stage output, max 20000 chars total
+    const MAX_CHARS_PER_STAGE = 5000;
+    const MAX_TOTAL_CHARS = 20000;
+
+    let totalChars = 0;
+    const formattedOutputs: string[] = [];
+
+    for (const [key, value] of Object.entries(input.previousStageOutputs)) {
+      if (totalChars >= MAX_TOTAL_CHARS) {
+        formattedOutputs.push('\n## [Additional stages truncated to stay within prompt budget]');
+        break;
+      }
+
+      const jsonString = JSON.stringify(value, null, 2);
+
+      if (jsonString.length <= MAX_CHARS_PER_STAGE) {
+        // Fits within budget, include full output
+        formattedOutputs.push(`## ${key}\n\n${jsonString}`);
+        totalChars += jsonString.length;
+      } else {
+        // Too large, truncate with warning
+        const truncated = jsonString.substring(0, MAX_CHARS_PER_STAGE);
+        const truncationMsg = `[Truncated: ${jsonString.length} chars → ` +
+          `${MAX_CHARS_PER_STAGE} chars to prevent prompt overflow]`;
+        formattedOutputs.push(`## ${key}\n\n${truncated}\n\n${truncationMsg}`);
+        totalChars += MAX_CHARS_PER_STAGE;
+      }
+    }
+
     return `
 # Previous Stage Outputs
 
-${Object.entries(input.previousStageOutputs)
-    .map(([key, value]) => `## ${key}\n\n${JSON.stringify(value, null, 2)}`)
-    .join('\n\n')}
+${formattedOutputs.join('\n\n')}
     `.trim();
   }
 }

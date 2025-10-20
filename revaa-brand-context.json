@@ -1,29 +1,16 @@
 {
   "brandName": "Revaa",
-  "category": "Sustainable Menstrual Wellness & Period Care",
-  "currentRevenue": "Not publicly disclosed",
-  "targetRevenue": "Market expansion target",
+  "category": "Ethnic Fashion & Lifestyle",
+  "currentRevenue": "₹35 Cr",
+  "targetRevenue": "₹100 Cr",
   "website": "https://revaaforyou.com",
   "competitors": [
-    "Saathi",
-    "Carmesi",
-    "Nua",
-    "Avni",
-    "Azah",
-    "Sanfe",
-    "Eco Femme"
+    "Manyavar",
+    "Fabindia",
+    "Biba",
+    "W for Woman",
+    "Aurelia"
   ],
-  "dataSources": [
-    {
-      "type": "website",
-      "path": "https://revaaforyou.com",
-      "description": "Main brand website with product catalog"
-    },
-    {
-      "type": "reviews",
-      "path": "website_reviews",
-      "description": "Customer reviews and testimonials"
-    }
-  ],
-  "customInstructions": "Revaa is a sustainable menstrual wellness brand founded by Mahipal Singh, serving women aged 13-40 in Tier 1 and Tier 2 Indian cities. Focus on positioning against mass-market disposable brands (Whisper, Stayfree, Kotex) while competing in the premium sustainable segment with Saathi, Carmesi, and Nua. Key differentiators: 100% cotton, highly absorbent, 100% leakproof construction with durability up to 100 washes. Products include period underwear, reusable sanitary pads, period activewear, and wellness items. Brand has sold 35,000+ products. Target Gen Z consumers (43% of India's consumption by 2025, $250 billion spending power) who prefer aspirational, premium, and sustainable products. Analyze white space opportunities in the sustainable period care market, positioning strategy to differentiate from both mass-market and premium eco-friendly competitors, and messaging that resonates with young, environmentally conscious Indian women."
+  "dataSources": [],
+  "customInstructions": "Revaa is a premium ethnic fashion brand targeting modern Indian women who value traditional craftsmanship with contemporary design. Focus on omnichannel strategy, sustainable practices, and digital-first growth to scale from ₹35 Cr to ₹100 Cr revenue."
 }
