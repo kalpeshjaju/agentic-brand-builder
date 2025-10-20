@@ -132,8 +132,8 @@ describe('Resilience Integration Tests', () => {
       
       // Should try 3 times (initial + 2 retries) then stop
       // Backoff: attempt 0 fails, wait 2^0=1s, attempt 1 fails, wait 2^1=2s, attempt 2 fails
-      // Total wait: 1s + 2s = 3s
-      expect(duration).toBeGreaterThanOrEqual(3000);
+      // Total wait: ~3s (allow 10ms tolerance for timing precision)
+      expect(duration).toBeGreaterThanOrEqual(2990);
       expect(duration).toBeLessThan(3500);
     }, 10000);
   });

@@ -1,7 +1,19 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { PdfExtractionAgent } from '../../src/agents/stage1/pdf-extraction-agent.js';
 import type { AgentConfig, AgentInput, BrandContext } from '../../src/types/index.js';
 import { AgentType } from '../../src/types/index.js';
+
+// Mock pdf-parse to avoid loading test data files
+vi.mock('pdf-parse', () => ({
+  default: vi.fn().mockResolvedValue({
+    numpages: 1,
+    numrender: 1,
+    info: {},
+    metadata: {},
+    text: 'Mocked PDF content for testing',
+    version: '1.0.0'
+  })
+}));
 
 describe('PdfExtractionAgent', () => {
   const mockConfig: AgentConfig = {
