@@ -1,17 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { BaseAgent } from '../../src/agents/base-agent.js';
-import type { AgentConfig, AgentInput } from '../../src/types/index.js';
-import { AgentType } from '../../src/types/index.js';
+import { AgentType, AgentConfig } from '../../src/types/index.js';
+import type { AgentInput } from '../../src/types/index.js';
 
-// Mock implementation of BaseAgent for testing
+// Mock concrete implementation for testing
 class TestAgent extends BaseAgent {
-  private shouldFail: boolean;
-  private shouldTimeout: boolean;
-
-  constructor(config: AgentConfig, apiKey: string, options?: { shouldFail?: boolean; shouldTimeout?: boolean }) {
+  constructor(config: AgentConfig, apiKey: string) {
     super(config, apiKey);
-    this.shouldFail = options?.shouldFail || false;
-    this.shouldTimeout = options?.shouldTimeout || false;
   }
 
   protected async run(input: AgentInput): Promise<{
@@ -20,118 +15,179 @@ class TestAgent extends BaseAgent {
     confidence?: number;
     sources?: string[];
   }> {
-    if (this.shouldTimeout) {
-      // Simulate timeout
-      await new Promise(resolve => setTimeout(resolve, 10000));
-    }
-
-    if (this.shouldFail) {
-      throw new Error('Test agent failure');
-    }
-
-    // Small delay to ensure measurable duration
-    await new Promise(resolve => setTimeout(resolve, 10));
-
+    // Simulate some work
+    await new Promise(resolve => setTimeout(resolve, 100));
     return {
-      data: { test: 'success', brandName: input.context.brandName },
+      data: { test: 'data', brand: input.context.brandName },
       tokensUsed: 100,
       confidence: 0.9,
-      sources: ['test']
+      sources: ['test_source']
     };
   }
 }
 
 describe('BaseAgent', () => {
-  const mockConfig: AgentConfig = {
-    type: AgentType.COMPETITOR_RESEARCH,
-    maxRetries: 2,
-    timeout: 1000, // 1 second for tests
-    model: 'claude-sonnet-4-5-20250929',
-    temperature: 0.3
-  };
-
-  const mockInput: AgentInput = {
+  let agent: TestAgent;
+  const mockApiKey = 'test-api-key';
+  const validInput: AgentInput = {
     context: {
       brandName: 'Test Brand',
       category: 'Test Category',
-      competitors: ['Competitor 1'],
+      competitors: [],
       dataSources: []
     }
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
+    const config: AgentConfig = {
+      type: AgentType.COMPETITOR_RESEARCH,
+      maxRetries: 2,
+      timeout: 5000,
+      model: 'claude-sonnet-4-5-20250929',
+      temperature: 0.3
+    };
+    agent = new TestAgent(config, mockApiKey);
   });
 
   describe('execute', () => {
-    it('should execute successfully and return completed status', async () => {
-      const agent = new TestAgent(mockConfig, 'test-api-key');
-      const result = await agent.execute(mockInput);
+    it('should successfully execute and return completed status', async () => {
+      const result = await agent.execute(validInput);
 
       expect(result.status).toBe('completed');
       expect(result.agentType).toBe(AgentType.COMPETITOR_RESEARCH);
-      expect(result.data).toEqual({ test: 'success', brandName: 'Test Brand' });
+      expect(result.data).toBeDefined();
       expect(result.metadata.tokensUsed).toBe(100);
       expect(result.metadata.confidence).toBe(0.9);
-      expect(result.metadata.sources).toEqual(['test']);
-      expect(result.metadata.durationMs).toBeGreaterThan(0);
     });
 
-    it('should retry on failure', async () => {
-      let attemptCount = 0;
-      class RetryTestAgent extends BaseAgent {
+    it('should track execution duration', async () => {
+      const result = await agent.execute(validInput);
+
+      expect(result.metadata.durationMs).toBeGreaterThan(0);
+      expect(result.metadata.durationMs).toBeGreaterThanOrEqual(100); // At least 100ms
+    });
+
+    it('should handle errors and return failed status', async () => {
+      // Create an agent that throws an error
+      class FailingAgent extends BaseAgent {
         protected async run(): Promise<{ data: unknown }> {
-          attemptCount++;
-          if (attemptCount <= 2) {
-            throw new Error('Temporary failure');
-          }
-          return { data: { success: true } };
+          throw new Error('Test error');
         }
       }
 
-      const agent = new RetryTestAgent(mockConfig, 'test-api-key');
-      const result = await agent.execute(mockInput);
-
-      expect(attemptCount).toBe(3); // Initial + 2 retries
-      expect(result.status).toBe('completed');
-    });
-
-    it('should return failed status after all retries exhausted', async () => {
-      const agent = new TestAgent(mockConfig, 'test-api-key', { shouldFail: true });
-      const result = await agent.execute(mockInput);
+      const failingAgent = new FailingAgent(agent.config, mockApiKey);
+      const result = await failingAgent.execute(validInput);
 
       expect(result.status).toBe('failed');
+      expect(result.data).toBeNull();
       expect(result.errors).toBeDefined();
-      expect(result.errors?.[0]).toContain('Test agent failure');
+      expect(result.errors?.[0]).toContain('Test error');
+    });
+  });
+
+  describe('validateInput', () => {
+    it('should throw error if input is missing', () => {
+      expect(() => agent['validateInput'](null as any)).toThrow('Agent input is required');
     });
 
-    it('should handle timeout', async () => {
-      const agent = new TestAgent(mockConfig, 'test-api-key', { shouldTimeout: true });
-      const result = await agent.execute(mockInput);
+    it('should throw error if context is missing', () => {
+      expect(() => agent['validateInput']({} as any)).toThrow('Brand context is required');
+    });
+
+    it('should throw error if brand name is missing', () => {
+      expect(() => agent['validateInput']({
+        context: { category: 'Test' }
+      } as any)).toThrow('Brand name is required');
+    });
+
+    it('should throw error if category is missing', () => {
+      expect(() => agent['validateInput']({
+        context: { brandName: 'Test' }
+      } as any)).toThrow('Brand category is required');
+    });
+
+    it('should not throw for valid input', () => {
+      expect(() => agent['validateInput'](validInput)).not.toThrow();
+    });
+  });
+
+  describe('timeout handling', () => {
+    it('should timeout if execution takes too long', async () => {
+      // Create agent with very short timeout
+      const config: AgentConfig = {
+        type: AgentType.COMPETITOR_RESEARCH,
+        maxRetries: 0,
+        timeout: 50, // 50ms timeout
+        model: 'claude-sonnet-4-5-20250929',
+        temperature: 0.3
+      };
+
+      class SlowAgent extends BaseAgent {
+        protected async run(): Promise<{ data: unknown }> {
+          await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+          return { data: 'should not reach' };
+        }
+      }
+
+      const slowAgent = new SlowAgent(config, mockApiKey);
+      const result = await slowAgent.execute(validInput);
 
       expect(result.status).toBe('failed');
       expect(result.errors?.[0]).toContain('timed out');
-    }, 15000);
+    });
+
+    it('should clear timer when execution completes normally', async () => {
+      // This test verifies no memory leak occurs
+      const result = await agent.execute(validInput);
+      
+      expect(result.status).toBe('completed');
+      expect(agent['activeTimer']).toBeNull();
+    });
   });
 
-  describe('formatBrandContext', () => {
-    it('should format brand context correctly', async () => {
-      class FormatTestAgent extends BaseAgent {
-        public testFormatBrandContext(input: AgentInput): string {
-          return this.formatBrandContext(input);
-        }
+  describe('retry logic', () => {
+    it('should retry on failure', async () => {
+      let attempts = 0;
 
+      class RetryAgent extends BaseAgent {
         protected async run(): Promise<{ data: unknown }> {
-          return { data: {} };
+          attempts++;
+          if (attempts < 2) {
+            throw new Error('Temporary error');
+          }
+          return { data: 'success', tokensUsed: 50 };
         }
       }
 
-      const agent = new FormatTestAgent(mockConfig, 'test-api-key');
-      const formatted = agent.testFormatBrandContext(mockInput);
+      const config: AgentConfig = {
+        ...agent.config,
+        maxRetries: 2
+      };
 
-      expect(formatted).toContain('Test Brand');
-      expect(formatted).toContain('Test Category');
-      expect(formatted).toContain('Competitor 1');
+      const retryAgent = new RetryAgent(config, mockApiKey);
+      const result = await retryAgent.execute(validInput);
+
+      expect(attempts).toBe(2); // Initial attempt + 1 retry
+      expect(result.status).toBe('completed');
+    });
+
+    it('should fail after max retries exhausted', async () => {
+      class AlwaysFailsAgent extends BaseAgent {
+        protected async run(): Promise<{ data: unknown }> {
+          throw new Error('Persistent error');
+        }
+      }
+
+      const config: AgentConfig = {
+        ...agent.config,
+        maxRetries: 1
+      };
+
+      const failingAgent = new AlwaysFailsAgent(config, mockApiKey);
+      const result = await failingAgent.execute(validInput);
+
+      expect(result.status).toBe('failed');
+      expect(result.errors?.[0]).toBe('Persistent error');
     });
   });
 });

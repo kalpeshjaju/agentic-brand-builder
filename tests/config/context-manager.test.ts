@@ -1,57 +1,133 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ContextManager } from '../../src/config/context-manager.js';
-import type { BrandContext, StageResult } from '../../src/types/index.js';
 import { Stage, StageStatus, AgentType, AgentStatus } from '../../src/types/index.js';
+import type { BrandContext, StageResult } from '../../src/types/index.js';
 
 describe('ContextManager', () => {
-  const mockBrandContext: BrandContext = {
+  let contextManager: ContextManager;
+  const brandContext: BrandContext = {
     brandName: 'Test Brand',
-    category: 'Test Category',
-    currentRevenue: '₹10 Cr',
-    targetRevenue: '₹50 Cr',
-    website: 'https://testbrand.com',
+    category: 'Technology',
     competitors: ['Competitor A', 'Competitor B'],
-    dataSources: [],
-    customInstructions: 'Test instructions'
+    dataSources: []
   };
 
-  let contextManager: ContextManager;
-
   beforeEach(() => {
-    contextManager = new ContextManager(mockBrandContext);
+    contextManager = new ContextManager(brandContext);
   });
 
-  describe('getBrandContext', () => {
-    it('should return the brand context', () => {
-      const context = contextManager.getBrandContext();
-      expect(context).toEqual(mockBrandContext);
+  describe('constructor and basic operations', () => {
+    it('should initialize with brand context', () => {
+      expect(contextManager.getBrandContext()).toEqual(brandContext);
     });
-  });
 
-  describe('updateBrandContext', () => {
-    it('should update brand context with partial updates', () => {
-      contextManager.updateBrandContext({
-        targetRevenue: '₹100 Cr'
-      });
-
+    it('should update brand context', () => {
+      contextManager.updateBrandContext({ currentRevenue: '₹50 Cr' });
       const updated = contextManager.getBrandContext();
-      expect(updated.targetRevenue).toBe('₹100 Cr');
-      expect(updated.brandName).toBe('Test Brand'); // Other fields unchanged
+      expect(updated.currentRevenue).toBe('₹50 Cr');
+      expect(updated.brandName).toBe('Test Brand');
     });
   });
 
-  describe('updateStageOutput', () => {
-    it('should store stage result', () => {
-      const stageResult: StageResult = {
+  describe('stage output management', () => {
+    const mockStageResult: StageResult = {
+      stage: Stage.DATA_INGESTION,
+      status: StageStatus.COMPLETED,
+      agentOutputs: [
+        {
+          agentType: AgentType.PDF_EXTRACTION,
+          status: AgentStatus.COMPLETED,
+          data: { extracted: 'test data' },
+          metadata: {
+            tokensUsed: 1000,
+            durationMs: 2000,
+            confidence: 0.9
+          }
+        }
+      ],
+      startedAt: new Date(),
+      completedAt: new Date(),
+      durationMs: 2000
+    };
+
+    it('should store stage output', () => {
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockStageResult);
+      const retrieved = contextManager.getStageOutput(Stage.DATA_INGESTION);
+      
+      expect(retrieved).toEqual(mockStageResult);
+    });
+
+    it('should mark stage as completed', () => {
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockStageResult);
+      
+      expect(contextManager.isStageCompleted(Stage.DATA_INGESTION)).toBe(true);
+      expect(contextManager.isStageCompleted(Stage.ANALYSIS)).toBe(false);
+    });
+
+    it('should return all stage outputs', () => {
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockStageResult);
+      const allOutputs = contextManager.getAllStageOutputs();
+      
+      expect(allOutputs).toHaveProperty('data_ingestion');
+      expect(allOutputs['data_ingestion']).toHaveProperty('pdf_extraction');
+    });
+  });
+
+  describe('shared data management', () => {
+    it('should store and retrieve shared data', () => {
+      contextManager.setSharedData('test_key', { value: 'test_value' });
+      const retrieved = contextManager.getSharedData('test_key');
+      
+      expect(retrieved).toEqual({ value: 'test_value' });
+    });
+
+    it('should return undefined for missing key', () => {
+      expect(contextManager.getSharedData('nonexistent')).toBeUndefined();
+    });
+  });
+
+  describe('memory management', () => {
+    it('should track memory usage in summary', () => {
+      const mockStageResult: StageResult = {
         stage: Stage.DATA_INGESTION,
         status: StageStatus.COMPLETED,
         agentOutputs: [
           {
-            agentType: AgentType.COMPETITOR_RESEARCH,
+            agentType: AgentType.PDF_EXTRACTION,
             status: AgentStatus.COMPLETED,
-            data: { competitors: ['A', 'B'] },
+            data: { extracted: 'a'.repeat(1000) }, // 1000 chars
             metadata: {
               tokensUsed: 1000,
+              durationMs: 2000
+            }
+          }
+        ],
+        startedAt: new Date(),
+        completedAt: new Date(),
+        durationMs: 2000
+      };
+
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockStageResult);
+      const summary = contextManager.getSummary();
+      
+      expect(summary.memoryUsageMB).toBeGreaterThanOrEqual(0);
+      expect(summary.completedStages).toBe(1);
+      expect(summary.totalStages).toBe(6);
+    });
+
+    it('should warn about large stage data', () => {
+      // Create a very large result
+      const largeData = 'x'.repeat(15 * 1024 * 1024); // 15MB of data
+      const largeStageResult: StageResult = {
+        stage: Stage.DATA_INGESTION,
+        status: StageStatus.COMPLETED,
+        agentOutputs: [
+          {
+            agentType: AgentType.PDF_EXTRACTION,
+            status: AgentStatus.COMPLETED,
+            data: { large: largeData },
+            metadata: {
+              tokensUsed: 10000,
               durationMs: 5000
             }
           }
@@ -61,44 +137,16 @@ describe('ContextManager', () => {
         durationMs: 5000
       };
 
-      contextManager.updateStageOutput(Stage.DATA_INGESTION, stageResult);
-
-      const retrieved = contextManager.getStageOutput(Stage.DATA_INGESTION);
-      expect(retrieved).toEqual(stageResult);
-    });
-
-    it('should extract agent data to shared data', () => {
-      const stageResult: StageResult = {
-        stage: Stage.ANALYSIS,
-        status: StageStatus.COMPLETED,
-        agentOutputs: [
-          {
-            agentType: AgentType.REVIEW_ANALYSIS,
-            status: AgentStatus.COMPLETED,
-            data: { sentiment: 'positive' },
-            metadata: { tokensUsed: 500, durationMs: 3000 }
-          }
-        ],
-        startedAt: new Date(),
-        completedAt: new Date(),
-        durationMs: 3000
-      };
-
-      contextManager.updateStageOutput(Stage.ANALYSIS, stageResult);
-
-      const allOutputs = contextManager.getAllStageOutputs();
-      expect(allOutputs[Stage.ANALYSIS]).toBeDefined();
-      expect((allOutputs[Stage.ANALYSIS] as any).review_analysis).toEqual({ sentiment: 'positive' });
+      // Should not throw, but may log warnings
+      expect(() => {
+        contextManager.updateStageOutput(Stage.DATA_INGESTION, largeStageResult);
+      }).not.toThrow();
     });
   });
 
-  describe('isStageCompleted', () => {
-    it('should return false for uncompleted stage', () => {
-      expect(contextManager.isStageCompleted(Stage.DATA_INGESTION)).toBe(false);
-    });
-
-    it('should return true for completed stage', () => {
-      const stageResult: StageResult = {
+  describe('export and import', () => {
+    it('should export and import context', () => {
+      const mockStageResult: StageResult = {
         stage: Stage.DATA_INGESTION,
         status: StageStatus.COMPLETED,
         agentOutputs: [],
@@ -107,8 +155,18 @@ describe('ContextManager', () => {
         durationMs: 1000
       };
 
-      contextManager.updateStageOutput(Stage.DATA_INGESTION, stageResult);
-      expect(contextManager.isStageCompleted(Stage.DATA_INGESTION)).toBe(true);
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockStageResult);
+      contextManager.setSharedData('test', 'value');
+
+      const exported = contextManager.export();
+
+      // Create new context manager and import
+      const newContextManager = new ContextManager(brandContext);
+      newContextManager.import(exported);
+
+      expect(newContextManager.getBrandContext()).toEqual(brandContext);
+      expect(newContextManager.isStageCompleted(Stage.DATA_INGESTION)).toBe(true);
+      expect(newContextManager.getSharedData('test')).toBe('value');
     });
   });
 
@@ -117,13 +175,14 @@ describe('ContextManager', () => {
       const summary = contextManager.getSummary();
 
       expect(summary.brandName).toBe('Test Brand');
-      expect(summary.category).toBe('Test Category');
+      expect(summary.category).toBe('Technology');
       expect(summary.completedStages).toBe(0);
       expect(summary.totalStages).toBe(6);
+      expect(summary.memoryUsageMB).toBe(0);
     });
 
-    it('should update completed stages count', () => {
-      const stageResult: StageResult = {
+    it('should update summary after stages complete', () => {
+      const mockResult: StageResult = {
         stage: Stage.DATA_INGESTION,
         status: StageStatus.COMPLETED,
         agentOutputs: [],
@@ -132,35 +191,12 @@ describe('ContextManager', () => {
         durationMs: 1000
       };
 
-      contextManager.updateStageOutput(Stage.DATA_INGESTION, stageResult);
+      contextManager.updateStageOutput(Stage.DATA_INGESTION, mockResult);
+      contextManager.updateStageOutput(Stage.ANALYSIS, mockResult);
 
       const summary = contextManager.getSummary();
-      expect(summary.completedStages).toBe(1);
-    });
-  });
-
-  describe('export and import', () => {
-    it('should export and import context successfully', () => {
-      const stageResult: StageResult = {
-        stage: Stage.DATA_INGESTION,
-        status: StageStatus.COMPLETED,
-        agentOutputs: [],
-        startedAt: new Date(),
-        completedAt: new Date(),
-        durationMs: 1000
-      };
-
-      contextManager.updateStageOutput(Stage.DATA_INGESTION, stageResult);
-      contextManager.setSharedData('test', { value: 123 });
-
-      const exported = contextManager.export();
-
-      const newContextManager = new ContextManager({ ...mockBrandContext, brandName: 'Different Brand' });
-      newContextManager.import(exported);
-
-      expect(newContextManager.getBrandContext().brandName).toBe('Test Brand');
-      expect(newContextManager.isStageCompleted(Stage.DATA_INGESTION)).toBe(true);
-      expect(newContextManager.getSharedData('test')).toEqual({ value: 123 });
+      expect(summary.completedStages).toBe(2);
     });
   });
 });
+

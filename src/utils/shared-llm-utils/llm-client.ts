@@ -13,7 +13,7 @@ import { z } from 'zod';
 dotenv.config({ path: '../.env.global' });
 
 // Response schema to ensure consistency
-const LLMResponseSchema = z.object({
+export const LLMResponseSchema = z.object({
   content: z.string(),
   model: z.string(),
   confidence: z.number().min(0).max(1),
@@ -23,6 +23,15 @@ const LLMResponseSchema = z.object({
 });
 
 export type LLMResponse = z.infer<typeof LLMResponseSchema>;
+
+// Options for LLM requests
+export interface LLMOptions {
+  maxTokens?: number;
+  temperature?: number;
+  topP?: number;
+  presencePenalty?: number;
+  frequencyPenalty?: number;
+}
 
 export type TaskType =
   | 'code_generation'
@@ -122,7 +131,7 @@ export class UnifiedLLMClient {
    */
   private async processWithClaude(
     prompt: string,
-    options: any
+    options: LLMOptions
   ): Promise<LLMResponse> {
     try {
       const message = await this.claude.messages.create({
@@ -156,7 +165,7 @@ export class UnifiedLLMClient {
    */
   private async processWithOpenAI(
     prompt: string,
-    options: any
+    options: LLMOptions
   ): Promise<LLMResponse> {
     try {
       const completion = await this.openai.chat.completions.create({
@@ -190,7 +199,7 @@ export class UnifiedLLMClient {
    */
   private async processWithGemini(
     prompt: string,
-    _options: any
+    _options: LLMOptions
   ): Promise<LLMResponse> {
     try {
       const model = this.gemini.getGenerativeModel({

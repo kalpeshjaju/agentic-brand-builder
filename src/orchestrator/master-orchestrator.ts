@@ -13,16 +13,25 @@ import { resolve } from 'path';
 
 /**
  * Master Orchestrator - Coordinates all 6 stages of brand intelligence generation
+ * Includes cost tracking and budget controls
  */
 export class MasterOrchestrator {
   private config: OrchestrationConfig;
   private contextManager: ContextManager;
   private stageOrchestrator: StageOrchestrator;
+  private totalTokensUsed: number = 0;
+  private totalCostUSD: number = 0;
+  // Default budget: 500K tokens (~$1.50 for Claude Sonnet)
+  private readonly maxTokenBudget: number = 500_000;
+  private readonly costPerMillionTokens: number = 3.00; // Claude Sonnet pricing
 
-  constructor(config: OrchestrationConfig, apiKey: string) {
+  constructor(config: OrchestrationConfig, apiKey: string, maxTokenBudget?: number) {
     this.config = config;
     this.contextManager = new ContextManager(config.brandContext);
     this.stageOrchestrator = new StageOrchestrator(apiKey, config.parallelAgents);
+    if (maxTokenBudget) {
+      this.maxTokenBudget = maxTokenBudget;
+    }
   }
 
   /**
@@ -43,6 +52,39 @@ export class MasterOrchestrator {
 
         const stageResult = await this.executeStage(stage, stageResults);
         stageResults.push(stageResult);
+
+        // Track token usage and cost
+        const stageTokens = stageResult.agentOutputs.reduce(
+          (sum, output) => sum + (output.metadata.tokensUsed || 0),
+          0
+        );
+        this.totalTokensUsed += stageTokens;
+        this.totalCostUSD = (this.totalTokensUsed / 1_000_000) * this.costPerMillionTokens;
+
+        // Display cost tracking
+        console.log(chalk.gray(
+          `💰 Stage tokens: ${stageTokens.toLocaleString()} | ` +
+          `Total: ${this.totalTokensUsed.toLocaleString()}/${this.maxTokenBudget.toLocaleString()} ` +
+          `($${this.totalCostUSD.toFixed(2)})`
+        ));
+
+        // Check budget limit
+        if (this.totalTokensUsed > this.maxTokenBudget) {
+          throw new Error(
+            `Budget exceeded: ${this.totalTokensUsed.toLocaleString()} tokens used ` +
+            `(limit: ${this.maxTokenBudget.toLocaleString()}). ` +
+            `Cost: $${this.totalCostUSD.toFixed(2)}. Stopping orchestration to prevent runaway costs.`
+          );
+        }
+
+        // Warn if approaching budget (80% threshold)
+        const budgetUsagePercent = (this.totalTokensUsed / this.maxTokenBudget) * 100;
+        if (budgetUsagePercent >= 80 && budgetUsagePercent < 100) {
+          console.log(chalk.yellow(
+            `⚠️  Warning: ${budgetUsagePercent.toFixed(1)}% of token budget used. ` +
+            `Remaining: ${(this.maxTokenBudget - this.totalTokensUsed).toLocaleString()} tokens`
+          ));
+        }
 
         // Check quality gate
         const qualityGate = await this.checkQualityGate(stage, stageResult);
@@ -72,6 +114,10 @@ export class MasterOrchestrator {
       const outputs = await this.persistProductionOutputs(stageResults);
 
       console.log(chalk.bold.green(`\n✅ Orchestration completed in ${(totalDurationMs / 1000).toFixed(2)}s`));
+      console.log(chalk.green(
+        `💰 Total cost: $${this.totalCostUSD.toFixed(2)} ` +
+        `(${this.totalTokensUsed.toLocaleString()} tokens)`
+      ));
       if (outputs.length > 0) {
         console.log(chalk.green(`📦 Generated ${outputs.length} output file(s):`));
         outputs.forEach(output => console.log(chalk.gray(`   - ${output.path}`)));

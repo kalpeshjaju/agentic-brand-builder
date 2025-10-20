@@ -74,7 +74,9 @@ export class RateLimiter {
    * Calculate wait time until next available slot
    */
   private getWaitTime(): number {
-    if (this.requests.length === 0) return 0;
+    if (this.requests.length === 0) {
+      return 0;
+    }
 
     const oldestRequest = Math.min(...this.requests);
     const windowStart = Date.now() - this.config.windowMs;
@@ -89,7 +91,7 @@ export class RateLimiter {
     requestsInWindow: number;
     slotsAvailable: number;
     utilizationPercent: number;
-  } {
+    } {
     const now = Date.now();
     const windowStart = now - this.config.windowMs;
     this.requests = this.requests.filter(time => time > windowStart);

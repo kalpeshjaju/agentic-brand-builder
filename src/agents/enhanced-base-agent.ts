@@ -3,7 +3,8 @@
  * Uses Claude for architecture, OpenAI for generation, Gemini for visual
  */
 
-import { llmClient, TaskType } from '../utils/shared-llm-utils/llm-client';
+import { llmClient, TaskType } from '../utils/shared-llm-utils/llm-client.js';
+import type { AgentInput, AgentOutput } from '../types/index.js';
 
 export abstract class EnhancedBaseAgent {
   protected name: string;
@@ -59,5 +60,5 @@ export abstract class EnhancedBaseAgent {
     );
   }
 
-  abstract execute(input: any): Promise<any>;
+  abstract execute(input: AgentInput): Promise<AgentOutput>;
 }

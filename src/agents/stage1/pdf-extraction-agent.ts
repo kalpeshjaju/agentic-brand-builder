@@ -2,7 +2,7 @@ import { BaseAgent } from '../base-agent.js';
 import type { AgentInput } from '../../types/index.js';
 import { existsSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-import pdfParse from 'pdf-parse';
+import { default as pdfParse } from 'pdf-parse';
 
 /**
  * PDF Extraction Agent
