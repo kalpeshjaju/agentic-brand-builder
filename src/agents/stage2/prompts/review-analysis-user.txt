@@ -1,0 +1,71 @@
+{{brandContext}}
+
+{{previousOutputs}}
+
+# Task
+Analyze customer reviews for {{brandName}} and extract comprehensive insights.
+
+If review data is available in previous outputs, use it. Otherwise, provide guidance on:
+- What review sources to analyze (website, Amazon, Google, social media)
+- What specific insights would be most valuable
+- How to structure the analysis
+
+# Analysis Framework
+
+1. **Sentiment Analysis**
+   - Overall sentiment score (-1 to +1)
+   - Distribution of positive, neutral, negative reviews
+   - Sentiment trends over time
+
+2. **Pain Points** (Top 5)
+   - Specific customer complaints
+   - Frequency and severity
+   - Customer segments affected
+
+3. **Delight Factors** (Top 5)
+   - What customers love most
+   - Specific praise patterns
+   - Emotional language used
+
+4. **Feature Requests**
+   - Most requested improvements
+   - Unmet needs
+
+5. **Language Patterns**
+   - Common phrases customers use
+   - Emotional triggers (trust, quality, value, status)
+   - Brand perception words
+
+# Output Format
+{
+  "overallSentiment": 0.65,
+  "reviewCount": 261,
+  "distribution": {
+    "positive": 185,
+    "neutral": 50,
+    "negative": 26
+  },
+  "painPoints": [
+    {
+      "issue": "...",
+      "frequency": 45,
+      "severity": "high|medium|low",
+      "affectedSegments": ["..."]
+    }
+  ],
+  "delightFactors": [
+    {
+      "factor": "...",
+      "frequency": 120,
+      "emotionalTrigger": "..."
+    }
+  ],
+  "featureRequests": ["..."],
+  "languagePatterns": {
+    "commonPhrases": ["..."],
+    "emotionalTriggers": ["trust", "quality", "..."],
+    "brandPerceptionWords": ["premium", "reliable", "..."]
+  },
+  "confidence": 0.85,
+  "sources": ["..."]
+}

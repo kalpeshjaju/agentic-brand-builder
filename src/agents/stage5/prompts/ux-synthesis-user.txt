@@ -1,0 +1,72 @@
+{{brandContext}}
+
+{{previousOutputs}}
+
+# Task
+Synthesize the provided UX analysis reports into a single, actionable UX strategy document.
+
+## Synthesis Framework
+
+### 1. Identify Top 5 Overarching UX Themes
+- Look for recurring issues and opportunities across the UX Audit, Review Analysis, and JTBD reports.
+- Examples: "Complex checkout process," "Lack of trust signals," "Mobile usability issues."
+
+### 2. Consolidate Key Findings
+- For each theme, summarize the supporting evidence from each report.
+- **UX Audit Evidence**: Heuristic violations, specific UI element issues.
+- **Review Analysis Evidence**: Direct customer quotes, common pain points.
+- **JTBD Evidence**: Underserved customer jobs, critical pains and gains.
+
+### 3. Strategic Recommendations
+- For each theme, provide a high-level strategic recommendation.
+- Example: "Redesign the checkout flow to be a single-page experience."
+
+### 4. Prioritized UX Roadmap (Next 3-6 Months)
+- Create a high-level roadmap with 3-5 key initiatives.
+- Prioritize based on:
+  - **Impact**: How much will this improve the user experience and business goals?
+  - **Effort**: How difficult will this be to implement?
+- Use a simple "High," "Medium," "Low" scale for impact and effort.
+
+### 5. Quick Wins
+- Identify 3-5 "low-hanging fruit" improvements that are high-impact and low-effort.
+
+# Output Format
+{
+  "uxStrategy": {
+    "topThemes": [
+      {
+        "theme": "...",
+        "description": "...",
+        "supportingEvidence": {
+          "uxAudit": ["...", "..."],
+          "reviewAnalysis": ["...", "..."],
+          "jtbd": ["...", "..."]
+        }
+      }
+    ],
+    "strategicRecommendations": [
+      {
+        "theme": "...",
+        "recommendation": "..."
+      }
+    ],
+    "prioritizedRoadmap": [
+      {
+        "initiative": "...",
+        "impact": "High|Medium|Low",
+        "effort": "High|Medium|Low",
+        "rationale": "..."
+      }
+    ],
+    "quickWins": [
+      {
+        "win": "...",
+        "impact": "High",
+        "effort": "Low"
+      }
+    ]
+  },
+  "confidence": 0.9,
+  "sources": ["ux-audit", "review-analysis", "jtbd"]
+}

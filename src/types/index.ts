@@ -31,10 +31,15 @@ export enum AgentType {
   DATA_NORMALIZATION = 'data_normalization',
   ENTITY_RECOGNITION = 'entity_recognition',
   COMPETITOR_RESEARCH = 'competitor_research',
-  MARKET_INTELLIGENCE = 'market_intelligence',
+  // Market Intelligence split into smaller agents
+  MARKET_INTELLIGENCE = 'market_intelligence',  // Legacy - to be removed
   MARKET_OVERVIEW = 'market_overview',
+  MARKET_TRENDS = 'market_trends',
   MARKET_DYNAMICS = 'market_dynamics',
-  PRICING_INTELLIGENCE = 'pricing_intelligence',
+  // Pricing Intelligence split into smaller agents
+  PRICING_INTELLIGENCE = 'pricing_intelligence',  // Legacy - to be removed
+  COMPETITIVE_PRICING = 'competitive_pricing',
+  PRICING_STRATEGY = 'pricing_strategy',
   VISUAL_IDENTITY_AUDITOR = 'visual_identity_auditor',
   PACKAGING_DESIGN_AUDITOR = 'packaging_design_auditor',
   UX_AUDITOR = 'ux_auditor',
@@ -72,6 +77,7 @@ export enum AgentType {
   CONTRADICTION_DETECTOR = 'contradiction_detector',
   STRATEGIC_AUDITOR = 'strategic_auditor',
   GAP_ANALYZER = 'gap_analyzer',
+  UX_SYNTHESIS = 'ux_synthesis',
 
   // Stage 6: Production
   HTML_GENERATOR = 'html_generator',

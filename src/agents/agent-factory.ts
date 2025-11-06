@@ -7,9 +7,18 @@ import { CompetitorResearchAgent } from './stage1/competitor-research-agent.js';
 import { PdfExtractionAgent } from './stage1/pdf-extraction-agent.js';
 import { DataNormalizationAgent } from './stage1/data-normalization-agent.js';
 import { EntityRecognitionAgent } from './stage1/entity-recognition-agent.js';
-import { MarketIntelligenceAgent } from './stage1/market-intelligence-agent.js';
+// Market Intelligence split into smaller agents
 import { MarketOverviewAgent } from './stage1/market-overview-agent.js';
+import { MarketTrendsAgent } from './stage1/market-trends-agent.js';
 import { MarketDynamicsAgent } from './stage1/market-dynamics-agent.js';
+
+// Pricing Intelligence split into smaller agents
+import { CompetitivePricingAgent } from './stage1/competitive-pricing-agent.js';
+import { PricingStrategyAgent } from './stage1/pricing-strategy-agent.js';
+import { UxAuditorAgent } from './stage1/ux-auditor-agent.js';
+
+// Legacy agents (to be replaced)
+import { MarketIntelligenceAgent } from './stage1/market-intelligence-agent.js';
 import { PricingIntelligenceAgent } from './stage1/pricing-intelligence-agent.js';
 import { ReviewAnalysisAgent } from './stage2/review-analysis-agent.js';
 import { SegmentationAgent } from './stage2/segmentation-agent.js';
@@ -23,6 +32,7 @@ import { RoadmapPlanningAgent } from './stage3/roadmap-planning-agent.js';
 import { StrategicDocumentWriterAgent } from './stage4/strategic-document-writer-agent.js';
 import { ExecutiveSummaryWriterAgent } from './stage4/executive-summary-writer-agent.js';
 import { ConsistencyCheckerAgent } from './stage5/consistency-checker-agent.js';
+import { UxSynthesisAgent } from './stage5/ux-synthesis-agent.js';
 import { HtmlGeneratorAgent } from './stage6/html-generator-agent.js';
 import { FinancialProjectionAgent } from './stage2/financial-projection-agent.js';
 
@@ -68,8 +78,22 @@ export class AgentFactory {
       case AgentType.MARKET_DYNAMICS:
         return new MarketDynamicsAgent(config, this.apiKey);
 
+      case AgentType.MARKET_TRENDS:
+        return new MarketTrendsAgent(config, this.apiKey);
+
+      // Legacy - kept for backwards compatibility
       case AgentType.PRICING_INTELLIGENCE:
         return new PricingIntelligenceAgent(config, this.apiKey);
+
+      // New split pricing agents
+      case AgentType.COMPETITIVE_PRICING:
+        return new CompetitivePricingAgent(config, this.apiKey);
+
+      case AgentType.PRICING_STRATEGY:
+        return new PricingStrategyAgent(config, this.apiKey);
+
+      case AgentType.UX_AUDITOR:
+        return new UxAuditorAgent(config, this.apiKey);
 
       // Stage 2: Analysis
       case AgentType.REVIEW_ANALYSIS:
@@ -113,6 +137,8 @@ export class AgentFactory {
       // Stage 5: Quality Assurance
       case AgentType.CONSISTENCY_CHECKER:
         return new ConsistencyCheckerAgent(config, this.apiKey);
+      case AgentType.UX_SYNTHESIS:
+        return new UxSynthesisAgent(config, this.apiKey);
 
       // Stage 6: Production
       case AgentType.HTML_GENERATOR:

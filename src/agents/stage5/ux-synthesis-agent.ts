@@ -1,3 +1,4 @@
+
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { BaseAgent } from '../base-agent.js';
@@ -8,18 +9,10 @@ import { parseJson } from '../../utils/parse-json.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 /**
- * Jobs-to-be-Done (JTBD) Agent
- *
- * Analyzes customer jobs, pains, and gains using the JTBD framework:
- * - Functional jobs: Tasks customers need to accomplish
- * - Emotional jobs: How customers want to feel
- * - Social jobs: How customers want to be perceived
- * - Pain points: Obstacles and frustrations
- * - Gains: Desired outcomes and benefits
- *
- * Outputs structured JTBD analysis for each segment
+ * UX Synthesis Agent
+ * Consolidates outputs from UX anaylsis agents into a holistic report.
  */
-export class JtbdAgent extends BaseAgent {
+export class UxSynthesisAgent extends BaseAgent {
   protected async run(input: AgentInput): Promise<{
     data: unknown;
     tokensUsed?: number;
@@ -30,11 +23,11 @@ export class JtbdAgent extends BaseAgent {
     const previousOutputs = this.formatPreviousOutputs(input);
 
     const systemPrompt = await readTextFile(
-      resolve(__dirname, 'prompts/jtbd-system.txt')
+      resolve(__dirname, 'prompts/ux-synthesis-system.txt')
     );
 
     const userPromptTemplate = await readTextFile(
-      resolve(__dirname, 'prompts/jtbd-user.txt')
+      resolve(__dirname, 'prompts/ux-synthesis-user.txt')
     );
 
     const userPrompt = userPromptTemplate
@@ -43,21 +36,24 @@ export class JtbdAgent extends BaseAgent {
 
     const response = await this.callClaude(systemPrompt, userPrompt, {
       maxTokens: 8000,
+      temperature: 0.4,
     });
 
     try {
-      const data = parseJson<{ confidence?: number }>(response.content);
+      const data = parseJson<{
+        confidence?: number;
+        sources?: string[];
+      }>(response.content);
 
       return {
         data,
         tokensUsed: response.tokensUsed,
         confidence: data.confidence || 0.8,
-        sources: ['jtbd_analysis'],
+        sources: ['ux-synthesis'],
       };
     } catch (error) {
       throw new Error(
-        `Failed to parse JTBD response: ${(error as Error).message}. ` +
-          'This may indicate malformed JSON from the LLM.'
+        `Failed to parse UX synthesis response: ${(error as Error).message}`
       );
     }
   }
