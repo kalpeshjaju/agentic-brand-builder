@@ -1,0 +1,133 @@
+{{brandContext}}
+
+# Website HTML Content
+```html
+{{html}}
+```
+
+# Task
+Conduct a comprehensive UI/UX audit of {{brandName}}'s website: {{website}} based on the HTML content provided.
+
+Analyze the following key areas:
+
+## 1. Navigation & Information Architecture
+- Menu structure and clarity
+- Breadcrumb navigation (if present)
+- Search functionality (if present)
+- Category organization
+- Mobile menu experience
+
+## 2. Visual Design & Aesthetics
+- Color scheme and brand consistency
+- Typography and readability
+- White space usage
+- Imagery quality and relevance
+- Overall visual hierarchy
+
+## 3. User Flow & Conversion Paths
+- Product discovery journey
+- Add-to-cart process
+- Checkout flow efficiency
+- Registration/signup process (if applicable)
+
+## 4. Mobile Experience
+- Responsive design quality
+- Touch target sizes
+- Mobile navigation
+- Content readability on small screens
+- Mobile loading performance
+
+## 5. Trust & Credibility
+- Customer testimonials/reviews visibility
+- Security badges and certificates
+- Return policy clarity
+- About us/brand story accessibility
+- Social proof elements
+
+## 6. Performance & Loading
+- Page load times (user-perceived)
+- Image optimization
+- Progressive loading
+- Lazy loading implementation
+
+## 7. Call-to-Action (CTA) Effectiveness
+- CTA placement and visibility
+- Button design and clarity
+- CTA copy effectiveness
+- Urgency and persuasion elements
+
+## 8. Accessibility
+- Alt text for images
+- Keyboard navigation
+- Color contrast
+- Screen reader compatibility
+
+# Output Format
+Provide a CONCISE, VALID JSON response. For each strength, weakness, and recommendation, provide an object with 'description' and 'evidence'. The evidence object must contain 'selector', 'nodeSnapshot' (a string representation of the HTML node), and 'metrics' (e.g., contrast ratio, load time, etc., if applicable).
+{
+  "navigation": {
+    "score": 0.85,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "visualDesign": {
+    "score": 0.80,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "userFlow": {
+    "score": 0.75,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "frictionPoints": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "mobileExperience": {
+    "score": 0.70,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "trustCredibility": {
+    "score": 0.80,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "performance": {
+    "score": 0.75,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "ctaEffectiveness": {
+    "score": 0.70,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "accessibility": {
+    "score": 0.65,
+    "strengths": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "weaknesses": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }],
+    "recommendations": [{ "description": "...", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }]
+  },
+  "overallScore": 0.75,
+  "topPriorities": [
+    { "description": "Priority 1: Most critical UX issue", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } },
+    { "description": "Priority 2: High-impact improvement", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } },
+    { "description": "Priority 3: Conversion blocker", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }
+  ],
+  "quickWins": [
+    { "description": "Quick win 1", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } },
+    { "description": "Quick win 2", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }
+  ],
+  "conversionBlockers": [
+    { "description": "Critical conversion barrier 1", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } },
+    { "description": "Critical conversion barrier 2", "evidence": { "selector": "...", "nodeSnapshot": "...", "metrics": {} } }
+  ],
+  "confidence": 0.85,
+  "sources": ["Website scrape", "Heuristic evaluation"]
+}
